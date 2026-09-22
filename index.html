@@ -3,9 +3,78 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <meta name="description" content="Sari2 is a simple inventory monitoring system for sari-sari stores.">
+    <title>Sari2 | Inventory Monitoring System</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/public.css">
+    <script src="js/home.js" defer></script>
 </head>
 <body>
-    
+    <header class="site-header">
+        <nav class="public-nav content-container" aria-label="Main navigation">
+            <a class="brand" href="index.html" aria-label="Sari2 home">Sari<span>2</span></a>
+            <div class="nav-links">
+                <a class="nav-link nav-link-current" href="index.html" aria-current="page">Home</a>
+                <a class="nav-link" href="html/frontfacing/contact.html">Contact Us</a>
+                <a class="btn-primary nav-login" href="html/frontfacing/login.html">Go to Login</a>
+            </div>
+        </nav>
+    </header>
+
+    <main>
+        <section class="hero-section" aria-labelledby="hero-title">
+            <div class="hero-carousel" aria-hidden="true">
+                <div class="hero-slide is-active"></div>
+                <div class="hero-slide"></div>
+                <div class="hero-slide"></div>
+                <div class="hero-slide"></div>
+                <div class="hero-slide"></div>
+            </div>
+            <div class="content-container hero-layout">
+                <div class="hero-copy">
+                    <p class="eyebrow">Simple inventory support</p>
+                    <h1 id="hero-title">Sari2</h1>
+                    <p class="hero-tagline">A simple inventory monitoring system for sari-sari stores.</p>
+                    <p class="hero-description">Keep product details organized, monitor stock levels and movement, and stay aware of upcoming expiration dates in one easy-to-use system.</p>
+                    <a class="btn-primary hero-action" href="html/frontfacing/login.html">Go to Login</a>
+                </div>
+            </div>
+        </section>
+
+        <section class="features-section" aria-labelledby="features-title">
+            <div class="content-container">
+                <div class="section-introduction">
+                    <p class="eyebrow">What Sari2 does</p>
+                    <h2 id="features-title">Keep everyday inventory tasks clear and organized.</h2>
+                    <p>Sari2 brings the essential parts of small-store inventory monitoring into one simple workspace.</p>
+                </div>
+
+                <div class="feature-grid">
+                    <article class="feature-card">
+                        <p class="feature-number" aria-hidden="true">01</p>
+                        <h3>Product Management</h3>
+                        <p>Manage product information, prices, quantities, and categories in one place.</p>
+                    </article>
+                    <article class="feature-card">
+                        <p class="feature-number" aria-hidden="true">02</p>
+                        <h3>Stock Monitoring</h3>
+                        <p>Monitor available stock and record items entering or leaving the store.</p>
+                    </article>
+                    <article class="feature-card">
+                        <p class="feature-number" aria-hidden="true">03</p>
+                        <h3>Expiration Monitoring</h3>
+                        <p>Identify products that are nearing or have passed their expiration dates.</p>
+                    </article>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="site-footer">
+        <div class="content-container footer-content">
+            <p><strong>Sari2</strong> · Inventory Monitoring System</p>
+            <p>&copy; 2026 Sari2</p>
+        </div>
+    </footer>
 </body>
 </html>
