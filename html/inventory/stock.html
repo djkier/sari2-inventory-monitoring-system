@@ -38,6 +38,22 @@
                 <p class="app-introduction">Record stock entering or leaving your store and review previous movements.</p>
                 <p id="stock-warning" class="field-error" role="alert"></p>
                 <p id="stock-empty" class="card empty-state" hidden>No products available. <a href="products.html">Add a product</a> before recording a movement.</p>
+                <section class="card stock-entry" aria-labelledby="stock-form-title">
+                    <h2 id="stock-form-title">Record a movement</h2>
+                    <form id="stock-form" novalidate>
+                        <fieldset id="stock-fields" disabled>
+                            <legend class="visually-hidden">Stock movement details</legend>
+                            <div class="stock-form-grid">
+                                <div class="form-group"><label for="stock-product">Product</label><select id="stock-product" required aria-describedby="stock-available stock-error"></select><p id="stock-available"></p></div>
+                                <div class="form-group"><label for="stock-type">Transaction Type</label><select id="stock-type" required aria-describedby="stock-error"><option value="">Select transaction type</option><option value="stock-in">Stock In</option><option value="stock-out">Stock Out</option></select></div>
+                                <div class="form-group"><label for="stock-quantity">Quantity</label><input id="stock-quantity" type="number" min="1" step="1" required aria-describedby="stock-error"></div>
+                            </div>
+                            <button class="btn-primary" type="submit">Record Movement</button>
+                        </fieldset>
+                        <p id="stock-error" class="field-error" role="alert"></p>
+                        <p id="stock-feedback" role="status" aria-live="polite"></p>
+                    </form>
+                </section>
                 
             </main>
         </div>
