@@ -75,3 +75,43 @@ function saveSettings(settings) {
         return false;
     }
 }
+
+function getStockMovements() {
+    initializeSampleInventory();
+    const movements = readStoredValue("sari2_stock_movements", []);
+    if (!Array.isArray(movements)) {
+        storageWarnings.push("Saved stock movements are not in the expected format.");
+        return [];
+    }
+    const valid = movements.filter(function (movement) {
+        return movement && typeof movement.productName === "string" &&
+            ["stock-in", "stock-out"].includes(movement.type) &&
+            Number.isSafeInteger(movement.quantity) && movement.quantity > 0 &&
+            typeof movement.date === "string" && Number.isFinite(new Date(movement.date).getTime());
+    });
+    if (valid.length !== movements.length) storageWarnings.push("Some saved stock movements could not be read.");
+    return valid;
+}
+
+// Save history first; restore it if the product write fails. No other keys change.
+function saveStockTransaction(products, movements) {
+    let previousHistory;
+    let historySaved = false;
+    try {
+        previousHistory = localStorage.getItem("sari2_stock_movements");
+        localStorage.setItem("sari2_stock_movements", JSON.stringify(movements));
+        historySaved = true;
+        localStorage.setItem("sari2_products", JSON.stringify(products));
+        return true;
+    } catch (error) {
+        if (historySaved) {
+            try {
+                if (previousHistory === null) localStorage.removeItem("sari2_stock_movements");
+                else localStorage.setItem("sari2_stock_movements", previousHistory);
+            } catch (restoreError) {
+                storageWarnings.push("History could not be restored after a failed save. Check inventory and history before retrying.");
+            }
+        }
+        return false;
+    }
+}
