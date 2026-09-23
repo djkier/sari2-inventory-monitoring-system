@@ -6,12 +6,15 @@ function renderDashboard() {
     const settings = getSettings();
     const products = getProducts();
     const today = new Date();
+
     const lowStock = products.filter(function (product) {
         return getStockStatus(product, settings) === "Low Stock";
     });
+
     const expiringSoon = products.filter(function (product) {
         return getExpirationStatus(product, settings.expirationWarningDays, today) === "Expiring Soon";
     });
+
     const outOfStock = products.filter(function (product) {
         return getStockStatus(product, settings) === "Out of Stock";
     });
@@ -30,6 +33,7 @@ function renderDashboard() {
 
     lowStock.sort(function (a, b) { return a.quantity - b.quantity || a.name.localeCompare(b.name); });
     outOfStock.sort(function (a, b) { return a.name.localeCompare(b.name); });
+
     renderMonitoringRows("low-stock-list", lowStock.slice(0, 3).map(function (product) {
         return [product.name, product.quantity, getLowStockThreshold(product, settings)];
     }), "No low-stock products.", 3, lowStock.length);
@@ -37,6 +41,7 @@ function renderDashboard() {
     renderMonitoringRows("out-of-stock-list", outOfStock.slice(0, 3).map(function (product) {
         return [product.name, product.category || "N/A", product.quantity];
     }), "No out-of-stock products.", 3, outOfStock.length);
+
     expiringSoon.sort(function (a, b) { return a.expirationDate.localeCompare(b.expirationDate); });
 
     renderExpiringSoonPreview(expiringSoon.map(function (product) {
@@ -79,6 +84,7 @@ function renderExpiringSoonPreview(rows) {
 function renderMonitoringRows(targetId, rows, emptyMessage, columnCount, totalCount) {
     const body = document.getElementById(targetId);
     body.replaceChildren();
+
     if (totalCount === 0) {
         const row = document.createElement("tr");
         const cell = document.createElement("td");
@@ -104,7 +110,9 @@ function renderMonitoringRows(targetId, rows, emptyMessage, columnCount, totalCo
         });
         body.appendChild(row);
     });
+    
     const remaining = totalCount - rows.length;
+
     if (remaining > 0) {
         const row = document.createElement("tr");
         const cell = document.createElement("td");
@@ -115,3 +123,18 @@ function renderMonitoringRows(targetId, rows, emptyMessage, columnCount, totalCo
         body.appendChild(row);
     }
 }
+
+renderDashboard();
+window.addEventListener("pageshow", renderDashboard);
+window.addEventListener("focus", renderDashboard);
+let dashboardResizeFrame;
+window.addEventListener("resize", function () {
+    window.cancelAnimationFrame(dashboardResizeFrame);
+    dashboardResizeFrame = window.requestAnimationFrame(renderDashboard);
+});
+if (document.fonts) document.fonts.ready.then(renderDashboard);
+window.addEventListener("storage", function (event) {
+    if (event.key === "sari2_products" || event.key === "sari2_settings" || event.key === null) {
+        renderDashboard();
+    }
+});
