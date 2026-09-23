@@ -82,6 +82,18 @@ function renderStockHistory(movements) {
     });
 }
 
-
+stockProduct.addEventListener("change", showAvailableStock);
+document.getElementById("stock-previous").addEventListener("click", function () {
+    historyPage -= 1;
+    refreshStock();
+});
+document.getElementById("stock-next").addEventListener("click", function () {
+    historyPage += 1;
+    refreshStock();
+});
+stockForm.addEventListener("input", function () { stockError.textContent = ""; stockFeedback.textContent = ""; });
 refreshStock();
 window.addEventListener("pageshow", refreshStock);
+window.addEventListener("storage", function (event) {
+    if (["sari2_products", "sari2_stock_movements", "sari2_settings", null].includes(event.key)) refreshStock();
+});
