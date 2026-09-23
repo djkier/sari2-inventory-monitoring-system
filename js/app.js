@@ -16,10 +16,19 @@ function initializeApp() {
     return user;
 }
 
+
 document.getElementById("logout-button").addEventListener("click", function () {
     if (logout()) {
         document.getElementById("app-shell").hidden = true;
     } else {
         document.getElementById("app-feedback").textContent = "Unable to log out. Please allow browser storage and try again.";
+    }
+});
+
+// Recheck sessions on browser-back navigation and after logout in another tab.
+window.addEventListener("pageshow", initializeApp);
+window.addEventListener("storage", function (event) {
+    if (event.key === "sari2_current_user" || event.key === "sari2_settings" || event.key === null) {
+        initializeApp();
     }
 });
