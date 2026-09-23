@@ -35,6 +35,11 @@ function refreshStock() {
     renderStockHistory(movements);
 }
 
+function showAvailableStock() {
+    const product = stockProduct.value === "" ? null : stockProducts[Number(stockProduct.value)];
+    document.getElementById("stock-available").textContent = product ? "Current stock: " + product.quantity : "Select a product to see its current stock.";
+}
+
 
 refreshStock();
 window.addEventListener("pageshow", refreshStock);
