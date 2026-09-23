@@ -330,3 +330,56 @@ productForm.addEventListener("submit", function (event) {
     productFeedback.textContent = "Product saved.";
 });
 
+function deleteProduct(index, snapshot) {
+    const latest = readProductsForChange(snapshot, productFeedback);
+    if (!latest || !window.confirm('Delete "' + latest[index].name + '"? Stock movement history will be kept.')) return;
+    latest.splice(index, 1);
+    if (!saveProducts(latest)) {
+        productFeedback.textContent = "Unable to delete the product. Check browser storage and try again.";
+        return;
+    }
+    closeProductEditor();
+    refreshProducts();
+    productFeedback.textContent = "Product deleted.";
+}
+
+document.getElementById("add-product").addEventListener("click", function () { openProductEditor(); });
+productInput("category").addEventListener("change", openCategoryDialog);
+document.getElementById("cancel-product").addEventListener("click", closeProductEditor);
+document.getElementById("product-search").addEventListener("input", function () {
+    productPage = 1;
+    renderProducts();
+});
+["stock-filter", "expiration-filter"].forEach(function (id) {
+    document.getElementById(id).addEventListener("change", function () {
+        productPage = 1;
+        renderProducts();
+    });
+});
+document.getElementById("products-previous").addEventListener("click", function () {
+    productPage -= 1;
+    renderProducts();
+});
+document.getElementById("products-next").addEventListener("click", function () {
+    productPage += 1;
+    renderProducts();
+});
+// Initialize the existing controls once; later manual changes and refreshes keep their values.
+function initializeProductFiltersFromUrl() {
+    const parameters = new URLSearchParams(window.location.search);
+    [["stockStatus", "stock-filter"], ["expirationStatus", "expiration-filter"]].forEach(function (entry) {
+        const filter = document.getElementById(entry[1]);
+        const requested = parameters.get(entry[0]);
+        const option = Array.from(filter.options).find(function (item) {
+            return item.value && item.value.toLowerCase().replaceAll(" ", "-") === requested;
+        });
+        if (option) filter.value = option.value;
+    });
+}
+
+initializeProductFiltersFromUrl();
+refreshProducts();
+window.addEventListener("pageshow", refreshProducts);
+window.addEventListener("storage", function (event) {
+    if (event.key === "sari2_products" || event.key === "sari2_settings" || event.key === null) refreshProducts();
+});
