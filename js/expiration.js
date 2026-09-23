@@ -69,3 +69,25 @@ function renderExpiration() {
         body.appendChild(row);
     });
 }
+
+expirationFilter.addEventListener("change", function () {
+    expirationPage = 1;
+    renderExpiration();
+});
+document.getElementById("expiration-previous").addEventListener("click", function () {
+    expirationPage -= 1;
+    renderExpiration();
+});
+document.getElementById("expiration-next").addEventListener("click", function () {
+    expirationPage += 1;
+    renderExpiration();
+});
+initializeExpirationFilterFromUrl();
+renderExpiration();
+window.addEventListener("pageshow", renderExpiration);
+window.addEventListener("focus", renderExpiration);
+window.addEventListener("storage", function (event) {
+    if (event.key === "sari2_products" || event.key === "sari2_settings" || event.key === null) {
+        renderExpiration();
+    }
+});
