@@ -141,3 +141,123 @@
         padding: 22px;
     }
 }
+
+
+.hero-section {
+    position: relative;
+    isolation: isolate;
+    overflow: hidden;
+    padding: 88px 0;
+    background: #134e4a;
+}
+
+.hero-section::before {
+    position: absolute;
+    z-index: -1;
+    inset: 0;
+    background: linear-gradient(100deg, rgba(6, 45, 42, 0.9) 0%, rgba(8, 65, 59, 0.78) 55%, rgba(6, 45, 42, 0.64) 100%);
+    content: "";
+}
+
+.hero-carousel {
+    position: absolute;
+    z-index: -2;
+    inset: 0;
+}
+
+.hero-slide {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: cover;
+    transition: opacity 1.2s ease-in-out;
+}
+
+.hero-slide.is-active {
+    opacity: 1;
+}
+
+.hero-slide:nth-child(1) {
+    background-image: url("../assets/images/carousel-hero/1.jpg");
+}
+
+.hero-slide:nth-child(2) {
+    background-image: url("../assets/images/carousel-hero/2.jpeg");
+}
+
+.hero-slide:nth-child(3) {
+    background-image: url("../assets/images/carousel-hero/3.jpg");
+}
+
+.hero-slide:nth-child(4) {
+    background-image: url("../assets/images/carousel-hero/4.jpg");
+}
+
+.hero-slide:nth-child(5) {
+    background-image: url("../assets/images/carousel-hero/5.jpg");
+}
+
+.hero-layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    align-items: center;
+}
+
+.eyebrow {
+    margin: 0 0 12px;
+    color: #ccfbf1;
+    font-size: 0.78rem;
+    font-weight: 800;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+}
+
+.hero-copy h1,
+.section-introduction h2,
+.feature-card h3 {
+    margin-top: 0;
+    color: var(--color-text);
+}
+
+.hero-copy h1,
+.hero-tagline {
+    color: #ffffff;
+}
+
+.hero-copy h1 {
+    margin-bottom: 8px;
+    font-size: clamp(3.3rem, 7vw, 5.4rem);
+    letter-spacing: -0.075em;
+    line-height: 0.95;
+}
+
+.hero-tagline {
+    max-width: 680px;
+    margin: 0;
+    font-size: clamp(1.45rem, 2.7vw, 2.2rem);
+    font-weight: 700;
+    letter-spacing: -0.03em;
+    line-height: 1.2;
+}
+
+.hero-description {
+    max-width: 650px;
+    margin: 24px 0 30px;
+    color: #e2e8f0;
+    font-size: 1.05rem;
+}
+
+.hero-action {
+    min-width: 138px;
+    border-color: #ffffff;
+    background: #ffffff;
+    color: var(--color-primary-dark);
+}
+
+.hero-action:hover {
+    border-color: #ccfbf1;
+    background: #ccfbf1;
+    color: #134e4a;
+}
