@@ -54,7 +54,24 @@
                             <p id="settings-owner-error" class="field-error"></p>
                         </div>
                     </fieldset>
-                    
+                    <fieldset class="card">
+                        <legend>Inventory Settings</legend>
+                        <div class="form-group">
+                            <label for="settings-threshold">Default Low Stock Threshold</label>
+                            <input id="settings-threshold" name="defaultLowStockThreshold" type="number" required min="0" step="1" aria-describedby="settings-threshold-error settings-threshold-help">
+                            <p id="settings-threshold-help" class="settings-help">Used for new products and products without their own threshold. Existing product thresholds are kept. Default: 5.</p>
+                            <p id="settings-threshold-error" class="field-error"></p>
+                        </div>
+                        <div class="form-group">
+                            <label for="settings-warning">Expiration Warning Days</label>
+                            <input id="settings-warning" name="expirationWarningDays" type="number" required min="0" step="1" aria-describedby="settings-warning-error settings-warning-help">
+                            <p id="settings-warning-help" class="settings-help">Includes today and the next number of days specified here. Default: 7.</p>
+                            <p id="settings-warning-error" class="field-error"></p>
+                        </div>
+                    </fieldset>
+                    <button class="btn-primary" type="submit">Save Settings</button>
+                    <p id="settings-error" class="field-error" role="alert"></p>
+                    <p id="settings-feedback" role="status" aria-live="polite"></p>
                 </form>
                 <dialog id="settings-success-dialog" class="settings-dialog" aria-labelledby="settings-success-title" aria-describedby="settings-success-message">
                     <h2 id="settings-success-title">Settings saved</h2>
