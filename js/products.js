@@ -235,3 +235,98 @@ function renderProducts() {
         body.appendChild(row);
     }
 }
+
+function openProductEditor(index = null) {
+    if (!initializeApp()) return;
+    editingIndex = index;
+    pendingCategories = [];
+    editorSnapshot = JSON.stringify(products);
+    productForm.reset();
+    formError.textContent = "";
+    productFeedback.textContent = "";
+    productFields.forEach(function (field) {
+        field.removeAttribute("aria-invalid");
+        document.getElementById(field.id + "-error").textContent = "";
+    });
+    document.getElementById("editor-title").textContent = index === null ? "Add Product" : "Edit Product";
+    productInput("quantity").disabled = index !== null;
+    document.getElementById("quantity-group").hidden = index !== null;
+    if (index === null) {
+        productInput("quantity").value = 0;
+        productInput("lowStockThreshold").value = productSettings.defaultLowStockThreshold;
+    } else {
+        productFields.forEach(function (field) { field.value = products[index][field.name] ?? ""; });
+        productInput("lowStockThreshold").value = getLowStockThreshold(products[index], productSettings);
+    }
+    populateCategoryOptions(index === null ? "" : products[index].category);
+    editor.hidden = false;
+    addProductButton.disabled = true;
+    addProductButton.textContent = index === null ? "Add Product" : "Editing Product";
+    productInput("name").focus();
+}
+
+function closeProductEditor() {
+    editor.hidden = true;
+    productForm.reset();
+    editingIndex = null;
+    pendingCategories = [];
+    addProductButton.disabled = false;
+    addProductButton.textContent = "Add Product";
+    addProductButton.focus();
+}
+
+// Compare against the displayed version to avoid overwriting another tab's edits.
+function readProductsForChange(snapshot, feedback) {
+    if (!initializeApp()) return null;
+    storageWarnings.length = 0;
+    const latest = getProducts();
+    if (storageWarnings.length) {
+        feedback.textContent = "Cannot change products while saved data is unreadable. " + storageWarnings.join(" ");
+        return null;
+    }
+    if (JSON.stringify(latest) !== snapshot) {
+        feedback.textContent = "Inventory changed in another page. Cancel and reopen the form, or refresh before trying again.";
+        refreshProducts();
+        return null;
+    }
+    return latest;
+}
+
+productForm.addEventListener("submit", function (event) {
+    event.preventDefault();
+    formError.textContent = "";
+    const values = {};
+    productFields.forEach(function (field) { values[field.name] = field.value.trim(); });
+    values.category = values.category.startsWith("category:") ? values.category.slice(9) : "";
+    const errors = validateProductValues(values, editingIndex !== null);
+    productFields.forEach(function (field) {
+        if (field.validity.badInput && !field.disabled) errors[field.name] = "Enter a valid value.";
+        document.getElementById(field.id + "-error").textContent = errors[field.name] || "";
+        field.setAttribute("aria-invalid", errors[field.name] ? "true" : "false");
+    });
+    const firstInvalid = productFields.find(function (field) { return errors[field.name]; });
+    if (firstInvalid) { firstInvalid.focus(); return; }
+    const latest = readProductsForChange(editorSnapshot, formError);
+    if (!latest) return;
+    const existingCategory = getProductCategories(latest).find(function (category) {
+        return category.toLowerCase() === values.category.toLowerCase();
+    });
+    values.category = existingCategory || values.category;
+    const product = {
+        ...(editingIndex === null ? {} : latest[editingIndex]),
+        name: values.name, category: values.category, price: Number(values.price),
+        quantity: editingIndex === null ? Number(values.quantity) : latest[editingIndex].quantity,
+        lowStockThreshold: Number(values.lowStockThreshold),
+        expirationDate: values.expirationDate, imageUrl: values.imageUrl
+    };
+    if (editingIndex === null) latest.push(product);
+    else latest[editingIndex] = product;
+    if (!saveProducts(latest)) {
+        formError.textContent = "Unable to save products. Check browser storage and try again.";
+        return;
+    }
+    closeProductEditor();
+    refreshProducts();
+    productFeedback.textContent = "Product saved.";
+});
+
