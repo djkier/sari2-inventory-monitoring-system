@@ -43,7 +43,32 @@
                 <h1>Expiration</h1>
                 <p class="app-introduction">Monitor product expiration dates and identify items that need attention.</p>
                 <p id="expiration-feedback" class="field-error" role="alert"></p>
-                
+                <section class="card monitoring-card" aria-labelledby="expiration-title">
+                    <h2 id="expiration-title">Product Expiration</h2>
+                    <p id="expiration-window"></p>
+                    <div class="form-group expiration-filter">
+                        <label for="expiration-filter">Expiration Status</label>
+                        <select id="expiration-filter">
+                            <option value="">All</option>
+                            <option value="Expiring Soon">Expiring Soon</option>
+                            <option value="Expired">Expired</option>
+                            <option value="Safe">Safe</option>
+                            <option value="No Expiration">No Expiration</option>
+                        </select>
+                    </div>
+                    <p id="expiration-count" role="status" aria-live="polite"></p>
+                    <div class="table-scroll" tabindex="0" role="region" aria-label="Product expiration">
+                        <table class="expiration-table">
+                            <thead><tr><th scope="col">Product</th><th scope="col">Current Stock</th><th scope="col">Expiration Date</th><th scope="col">Expiration Status</th></tr></thead>
+                            <tbody id="expiration-list"></tbody>
+                        </table>
+                    </div>
+                    <nav id="expiration-pagination" class="table-pagination" aria-label="Expiration pages" hidden>
+                        <button id="expiration-previous" class="btn-secondary" type="button" aria-controls="expiration-list">Previous</button>
+                        <span id="expiration-page-info" role="status" aria-live="polite"></span>
+                        <button id="expiration-next" class="btn-secondary" type="button" aria-controls="expiration-list">Next</button>
+                    </nav>
+                </section>
             </main>
             
         </div>
