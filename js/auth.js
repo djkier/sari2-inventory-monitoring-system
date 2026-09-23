@@ -112,3 +112,57 @@ if (loginForm) {
     });
     document.getElementById("login-fields").disabled = false;
 }
+
+const signupForm = document.getElementById("signup-form");
+if (signupForm) {
+    const fields = Array.from(signupForm.querySelectorAll("input, select"));
+    const password = document.getElementById("signup-password");
+    const confirmation = document.getElementById("signup-confirmation");
+
+    function validateSignupField(field) {
+        let message = "";
+        if (!field.value.trim()) {
+            message = "Please complete this field.";
+        } else if (field.id === "signup-role" &&
+            !testAccounts.some(function (account) { return account.role === field.value; })) {
+            message = "Please select Store Owner or Store Staff.";
+        } else if (field === confirmation && field.value !== password.value) {
+            message = "Passwords must match.";
+        }
+        document.getElementById(field.id + "-error").textContent = message;
+        field.setAttribute("aria-invalid", message ? "true" : "false");
+        return message === "";
+    }
+
+    signupForm.addEventListener("submit", function (event) {
+        event.preventDefault();
+        let firstInvalidField = null;
+        fields.forEach(function (field) {
+            if (!validateSignupField(field) && !firstInvalidField) {
+                firstInvalidField = field;
+            }
+        });
+        if (firstInvalidField) {
+            firstInvalidField.focus();
+            return;
+        }
+
+        // Simulation only: do not change testAccounts, session, or browser storage.
+        window.alert("Account creation simulation completed successfully. No account was created or saved. Use either test account on the Login page to access Sari2.");
+        signupForm.reset();
+        fields.forEach(function (field) { field.removeAttribute("aria-invalid"); });
+        window.location.assign(loginUrl);
+    });
+
+    fields.forEach(function (field) {
+        field.addEventListener("input", function () {
+            if (field.hasAttribute("aria-invalid")) {
+                validateSignupField(field);
+            }
+            if (field === password && confirmation.hasAttribute("aria-invalid")) {
+                validateSignupField(confirmation);
+            }
+        });
+    });
+    document.getElementById("signup-fields").disabled = false;
+}
