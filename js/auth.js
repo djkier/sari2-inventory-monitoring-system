@@ -71,3 +71,44 @@ if (loginForm) {
         input.setAttribute("aria-invalid", message ? "true" : "false");
         return message === "";
     }
+
+    loginForm.addEventListener("submit", function (event) {
+        event.preventDefault();
+        feedback.textContent = "";
+        let firstInvalidInput = null;
+        inputs.forEach(function (input) {
+            if (!validateLoginField(input) && !firstInvalidInput) {
+                firstInvalidInput = input;
+            }
+        });
+        if (firstInvalidInput) {
+            firstInvalidInput.focus();
+            return;
+        }
+
+        const account = testAccounts.find(function (user) {
+            return user.username === usernameInput.value.trim() && user.password === passwordInput.value;
+        });
+        if (!account) {
+            feedback.textContent = "Invalid username or password.";
+            passwordInput.focus();
+            return;
+        }
+        if (!saveSession(account)) {
+            feedback.textContent = "Unable to save your login. Please allow browser storage and try again.";
+            return;
+        }
+        passwordInput.value = "";
+        window.location.assign(dashboardUrl);
+    });
+
+    inputs.forEach(function (input) {
+        input.addEventListener("input", function () {
+            feedback.textContent = "";
+            if (input.hasAttribute("aria-invalid")) {
+                validateLoginField(input);
+            }
+        });
+    });
+    document.getElementById("login-fields").disabled = false;
+}
