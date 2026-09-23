@@ -59,7 +59,7 @@ function renderExpiringSoonPreview(rows) {
     const style = window.getComputedStyle(card);
     const bottomInset = parseFloat(style.paddingBottom) + parseFloat(style.borderBottomWidth);
     let visible = 0;
-    
+
     for (let count = 1; count <= rows.length; count += 1) {
         renderMonitoringRows("expiring-soon-list", rows.slice(0, count), "No products are expiring soon.", 2, rows.length);
         const availableBottom = card.getBoundingClientRect().top + leftHeight - bottomInset;
@@ -76,3 +76,42 @@ function renderExpiringSoonPreview(rows) {
     renderMonitoringRows("expiring-soon-list", rows.slice(0, visible), "No products are expiring soon.", 2, rows.length);
 }
 
+function renderMonitoringRows(targetId, rows, emptyMessage, columnCount, totalCount) {
+    const body = document.getElementById(targetId);
+    body.replaceChildren();
+    if (totalCount === 0) {
+        const row = document.createElement("tr");
+        const cell = document.createElement("td");
+        cell.colSpan = columnCount;
+        cell.className = "empty-state";
+        cell.textContent = emptyMessage;
+        row.appendChild(cell);
+        body.appendChild(row);
+        return;
+    }
+    rows.forEach(function (values) {
+        const row = document.createElement("tr");
+        values.forEach(function (value, index) {
+            const cell = document.createElement("td");
+            cell.textContent = value;
+            if (index === 0) {
+                cell.className = "dashboard-product-name";
+                cell.title = value;
+            } else if (targetId !== "out-of-stock-list" || index === 2) {
+                cell.className = "dashboard-centered";
+            }
+            row.appendChild(cell);
+        });
+        body.appendChild(row);
+    });
+    const remaining = totalCount - rows.length;
+    if (remaining > 0) {
+        const row = document.createElement("tr");
+        const cell = document.createElement("td");
+        cell.colSpan = columnCount;
+        cell.className = "dashboard-more-products";
+        cell.textContent = "+" + remaining + " more " + (remaining === 1 ? "product" : "products");
+        row.appendChild(cell);
+        body.appendChild(row);
+    }
+}
