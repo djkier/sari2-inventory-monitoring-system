@@ -24,6 +24,26 @@ function parseCalendarDate(value) {
     return date.getFullYear() === parts[0] && date.getMonth() === parts[1] - 1 && date.getDate() === parts[2] ? date : null;
 }
 
+function getExpirationStatus(product, warningDays, today = new Date()) {
+
+    if (!product.expirationDate) {
+        return "No Expiration";
+    }
+    const expiration = parseCalendarDate(product.expirationDate);
+
+    if (!expiration) {
+        return "Invalid Date";
+    }
+    const start = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+    const warningEnd = new Date(start);
+    warningEnd.setDate(warningEnd.getDate() + warningDays);
+    
+    if (expiration < start) {
+        return "Expired";
+    }
+    return expiration <= warningEnd ? "Expiring Soon" : "Safe";
+}
+
 function formatExpirationDate(value) {
     const date = parseCalendarDate(value);
     return date ? date.toLocaleDateString("en-PH", { year: "numeric", month: "short", day: "numeric" }) : "N/A";
