@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Products | Sari2</title>
+    <link rel="stylesheet" href="../../css/style.css">
+    <link rel="stylesheet" href="../../css/app.css">
+    <script src="../../js/stock-items.js" defer></script>
+    <script src="../../js/storage.js" defer></script>
+    <script src="../../js/auth.js" defer></script>
+    <script src="../../js/inventory.js" defer></script>
+    <script src="../../js/app.js" defer></script>
+    <script src="../../js/products.js" defer></script>
+</head>
+<body>
+
+    <noscript><p>Please enable JavaScript and <a href="../frontfacing/login.html">log in</a> to access Sari2.</p></noscript>
+
+    <div id="app-shell" class="app-shell" hidden>
+        <aside class="app-sidebar">
+            <a class="app-brand" href="dashboard.html">Sari<span>2</span></a>
+            <p class="app-sidebar-label">Inventory management</p>
+            <nav class="app-nav" aria-label="Application navigation">
+                <a href="dashboard.html">Dashboard</a>
+                <a href="products.html" aria-current="page">Products</a>
+                <a href="stock.html">Stock Movement</a>
+                <a href="expiration.html">Expiration</a>
+            </nav>
+            <nav class="app-nav app-nav-secondary" aria-label="Account and settings">
+                <a href="settings.html">Settings</a>
+                <button id="logout-button" type="button">Logout</button>
+            </nav>
+            <p id="app-feedback" class="field-error" role="alert"></p>
+        </aside>
+
+        <div class="app-workspace">
+            <header class="app-header">
+                <p id="store-name"></p>
+                <div class="app-user" aria-label="Logged-in user">
+                    <strong id="current-user-name"></strong>
+                    <span id="current-user-role"></span>
+                </div>
+            </header>
+            <main class="app-content">
+                <div class="products-heading"><h1>Products</h1><button id="add-product" class="btn-primary" type="button">Add Product</button></div>
+                <p class="app-introduction">Manage product details and monitor stock and expiration separately.</p>
+                <p id="products-warning" class="field-error" role="alert"></p>
+                <p id="products-feedback" role="status" aria-live="polite"></p>
+                <section id="product-editor" class="card product-editor" aria-labelledby="editor-title" hidden>
+                    <h2 id="editor-title">Add Product</h2>
+                    <p id="quantity-help">Set the initial quantity when adding a product. Later stock changes belong in Stock Movement.</p>
+                    <form id="product-form" novalidate>
+                        <div class="product-form-grid">
+                        <div class="form-group">
+                            <label for="product-name">Product Name</label>
+                            <input id="product-name" name="name" type="text" required aria-describedby="product-name-error">
+                            <p class="field-error" id="product-name-error"></p>
+                        </div>
+                        <div class="form-group">
+                            <label for="product-category">Category</label>
+                            <select id="product-category" name="category" required aria-describedby="product-category-error"></select>
+                            <p class="field-error" id="product-category-error"></p>
+                        </div>
+                        <div class="form-group">
+                            <label for="product-price">Price (₱)</label>
+                            <input id="product-price" name="price" type="number" required min="0" step="any" aria-describedby="product-price-error">
+                            <p class="field-error" id="product-price-error"></p>
+                        </div>
+                        <div class="form-group" id="quantity-group">
+                            <label for="product-quantity">Initial Quantity</label>
+                            <input id="product-quantity" name="quantity" type="number" required min="0" step="1" aria-describedby="product-quantity-error">
+                            <p class="field-error" id="product-quantity-error"></p>
+                        </div>
+                        <div class="form-group">
+                            <label for="product-lowStockThreshold">Low Stock Threshold</label>
+                            <input id="product-lowStockThreshold" name="lowStockThreshold" type="number" required min="0" step="1" aria-describedby="product-lowStockThreshold-error">
+                            <p class="field-error" id="product-lowStockThreshold-error"></p>
+                        </div>
+                        <div class="form-group">
+                            <label for="product-expirationDate">Expiration Date (optional)</label>
+                            <input id="product-expirationDate" name="expirationDate" type="date"  aria-describedby="product-expirationDate-error">
+                            <p class="field-error" id="product-expirationDate-error"></p>
+                        </div>
+                        <div class="form-group">
+                            <label for="product-imageUrl">Image URL (optional)</label>
+                            <input id="product-imageUrl" name="imageUrl" type="text" placeholder="https://example.com/product.jpg" aria-describedby="product-imageUrl-error">
+                            <p class="field-error" id="product-imageUrl-error"></p>
+                        </div>
+                        </div>
+                        <p id="product-form-error" class="field-error" role="alert"></p>
+                        <div class="product-actions">
+                            <button class="btn-primary" type="submit">Save Product</button>
+                            <button id="cancel-product" class="btn-secondary" type="button">Cancel</button>
+                        </div>
+                    </form>
+                </section>
+
+                <dialog id="category-dialog" class="category-dialog" aria-labelledby="category-dialog-title">
+                    <h2 id="category-dialog-title">Add New Category</h2>
+                    <form id="category-form" novalidate>
+                        <div class="form-group">
+                            <label for="category-name">Category Name</label>
+                            <input id="category-name" type="text" required aria-describedby="category-name-error">
+                            <p id="category-name-error" class="field-error" role="alert"></p>
+                        </div>
+                        <div class="product-actions">
+                            <button id="cancel-category" class="btn-secondary" type="button">Cancel</button>
+                            <button class="btn-primary" type="submit">Add Category</button>
+                        </div>
+                    </form>
+                </dialog>
+
+                <div class="product-filters">
+                    <div class="form-group"><label for="product-search">Search product name</label><input id="product-search" type="search" placeholder="Search products"></div>
+                    <div class="form-group"><label for="stock-filter">Stock Status</label><select id="stock-filter"><option value="">All Stock Status</option><option>In Stock</option><option>Low Stock</option><option>Out of Stock</option></select></div>
+                    <div class="form-group"><label for="expiration-filter">Expiration Status</label><select id="expiration-filter"><option value="">All Expiration Status</option><option>Safe</option><option>Expiring Soon</option><option>Expired</option><option>No Expiration</option></select></div>
+                </div>
+
+                <div class="card table-scroll" tabindex="0" role="region" aria-label="Products table">
+                    <table class="products-table">
+                        <thead>
+                            <tr>
+                                <th scope="col">Image</th>
+                                <th scope="col">Product Name</th>
+                                <th scope="col">Category</th>
+                                <th scope="col">Price</th>
+                                <th scope="col" class="th-centered">Current Stock</th>
+                                <th scope="col" class="th-centered">Low Stock Threshold</th>
+                                <th scope="col">Expiration Date</th>
+                                <th scope="col">Stock Status</th>
+                                <th scope="col">Expiration Status</th>
+                                <th scope="col" class="th-centered">Actions</th>
+                        
+                            </tr>
+                        </thead>
+                        <tbody id="products-list"></tbody>
+                    </table>
+                </div>
+                
+                <nav id="products-pagination" class="table-pagination" aria-label="Product pages" hidden>
+                    <button id="products-previous" class="btn-secondary" type="button" aria-controls="products-list">Previous</button>
+                    <span id="products-page-info" role="status" aria-live="polite"></span>
+                    <button id="products-next" class="btn-secondary" type="button" aria-controls="products-list">Next</button>
+                </nav>
+            </main>
+        </div>
+    </div>
+</body>
+</html>
