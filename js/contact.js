@@ -16,3 +16,29 @@ function validateContactField(field) {
     field.setAttribute("aria-invalid", message ? "true" : "false");
     return message === "";
 }
+
+contactForm.addEventListener("submit", function (event) {
+    // This demonstration never sends or stores the entered information.
+    event.preventDefault();
+    contactFeedback.textContent = "";
+    let firstInvalidField = null;
+
+    inquiryInputs.forEach(function (field) {
+        field.value = field.value.trim();
+        if (!validateContactField(field) && !firstInvalidField) {
+            firstInvalidField = field;
+        }
+    });
+
+    if (firstInvalidField) {
+        contactFeedback.textContent = "Please correct the indicated fields and try again.";
+        firstInvalidField.focus();
+        return;
+    }
+
+    window.alert("This contact form is for demonstration purposes only. No message has been sent.");
+    contactForm.reset();
+    inquiryInputs.forEach(function (field) {
+        field.removeAttribute("aria-invalid");
+    });
+});
