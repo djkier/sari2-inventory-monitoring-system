@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Expiration | Sari2</title>
+    <link rel="stylesheet" href="../../css/style.css">
+    <link rel="stylesheet" href="../../css/app.css">
+    <script src="../../js/stock-items.js" defer></script>
+    <script src="../../js/storage.js" defer></script>
+    <script src="../../js/auth.js" defer></script>
+    <script src="../../js/inventory.js" defer></script>
+    <script src="../../js/app.js" defer></script>
+    <script src="../../js/expiration.js" defer></script>
+</head>
+<body>
+    <noscript><p>Please enable JavaScript and <a href="../frontfacing/login.html">log in</a> to access Sari2.</p></noscript>
+    <div id="app-shell" class="app-shell" hidden>
+        <aside class="app-sidebar">
+            <a class="app-brand" href="dashboard.html">Sari<span>2</span></a>
+            <p class="app-sidebar-label">Inventory management</p>
+            <nav class="app-nav" aria-label="Application navigation">
+                <a href="dashboard.html">Dashboard</a>
+                <a href="products.html">Products</a>
+                <a href="stock.html">Stock Movement</a>
+                <a href="expiration.html" aria-current="page">Expiration</a>
+            </nav>
+            <nav class="app-nav app-nav-secondary" aria-label="Account and settings">
+                <a href="settings.html">Settings</a>
+                <button id="logout-button" type="button">Logout</button>
+            </nav>
+            <p id="app-feedback" class="field-error" role="alert"></p>
+        </aside>
+        <div class="app-workspace">
+            <header class="app-header">
+                <p id="store-name"></p>
+                <div class="app-user" aria-label="Logged-in user">
+                    <strong id="current-user-name"></strong>
+                    <span id="current-user-role"></span>
+                </div>
+            </header>
+            <main class="app-content">
+                <h1>Expiration</h1>
+                <p class="app-introduction">Monitor product expiration dates and identify items that need attention.</p>
+                <p id="expiration-feedback" class="field-error" role="alert"></p>
+                <section class="card monitoring-card" aria-labelledby="expiration-title">
+                    <h2 id="expiration-title">Product Expiration</h2>
+                    <p id="expiration-window"></p>
+                    <div class="form-group expiration-filter">
+                        <label for="expiration-filter">Expiration Status</label>
+                        <select id="expiration-filter">
+                            <option value="">All</option>
+                            <option value="Expiring Soon">Expiring Soon</option>
+                            <option value="Expired">Expired</option>
+                            <option value="Safe">Safe</option>
+                            <option value="No Expiration">No Expiration</option>
+                        </select>
+                    </div>
+                    <p id="expiration-count" role="status" aria-live="polite"></p>
+                    <div class="table-scroll" tabindex="0" role="region" aria-label="Product expiration">
+                        <table class="expiration-table">
+                            <thead><tr><th scope="col">Product</th><th scope="col">Current Stock</th><th scope="col">Expiration Date</th><th scope="col">Expiration Status</th></tr></thead>
+                            <tbody id="expiration-list"></tbody>
+                        </table>
+                    </div>
+                    <nav id="expiration-pagination" class="table-pagination" aria-label="Expiration pages" hidden>
+                        <button id="expiration-previous" class="btn-secondary" type="button" aria-controls="expiration-list">Previous</button>
+                        <span id="expiration-page-info" role="status" aria-live="polite"></span>
+                        <button id="expiration-next" class="btn-secondary" type="button" aria-controls="expiration-list">Next</button>
+                    </nav>
+                </section>
+            </main>
+            
+        </div>
+    </div>
+</body>
+</html>
