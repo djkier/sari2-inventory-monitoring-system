@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Ask about Sari2, learn more about inventory monitoring for your sari-sari store, or share your feedback.">
+    <title>Contact Us | Sari2</title>
+    <link rel="stylesheet" href="../../css/style.css">
+    <link rel="stylesheet" href="../../css/public.css">
+    <script src="../../js/contact.js" defer></script>
+</head>
+<body>
+    <header class="site-header">
+        <nav class="public-nav content-container" aria-label="Main navigation">
+            <a class="brand" href="../../index.html" aria-label="Sari2 home">Sari<span>2</span></a>
+            <div class="nav-links">
+                <a class="nav-link" href="../../index.html">Home</a>
+                <a class="nav-link nav-link-current" href="contact.html" aria-current="page">Contact Us</a>
+                <a class="btn-primary nav-login" href="login.html">Go to Login</a>
+            </div>
+        </nav>
+    </header>
+
+    <main class="contact-section content-container">
+        <div class="contact-layout">
+            <section class="contact-introduction" aria-labelledby="contact-title">
+                <p class="eyebrow">Contact Us</p>
+                <h1 id="contact-title">Interested in Sari2?</h1>
+                <p>Whether you own a sari-sari store, help manage its daily inventory, or simply want to learn more about Sari2, we'd love to hear from you.</p>
+                <p>Sari2 helps you organize product information, keep track of stock levels and movement, and monitor expiration dates so everyday inventory tasks are easier to manage.</p>
+                <p>Use the form to ask questions, share suggestions or feedback, or inquire about using Sari2 for your store.</p>
+            </section>
+
+            <section class="contact-panel" aria-labelledby="contact-form-title">
+                <h2 id="contact-form-title">Send us a message</h2>
+                <p id="contact-form-help">All fields are required.</p>
+                <noscript><p>Please enable JavaScript to use the contact form.</p></noscript>
+                <form id="contact-form" aria-describedby="contact-form-help" novalidate>
+                    <fieldset id="contact-fields" disabled>
+                        <legend class="visually-hidden">Inquiry details</legend>
+                        <div class="form-group">
+                            <label for="contact-name">Name</label>
+                            <input id="contact-name" name="name" type="text" autocomplete="name" required aria-describedby="contact-name-error">
+                            <p class="field-error" id="contact-name-error"></p>
+                        </div>
+                        <div class="form-group">
+                            <label for="contact-email">Email</label>
+                            <input id="contact-email" name="email" type="email" autocomplete="email" required aria-describedby="contact-email-error">
+                            <p class="field-error" id="contact-email-error"></p>
+                        </div>
+                        <div class="form-group">
+                            <label for="contact-subject">Subject</label>
+                            <input id="contact-subject" name="subject" type="text" required aria-describedby="contact-subject-error">
+                            <p class="field-error" id="contact-subject-error"></p>
+                        </div>
+                        <div class="form-group">
+                            <label for="contact-message">Message</label>
+                            <textarea id="contact-message" name="message" rows="5" required aria-describedby="contact-message-error"></textarea>
+                            <p class="field-error" id="contact-message-error"></p>
+                        </div>
+                        <button class="btn-primary" type="submit">Send Message</button>
+                    </fieldset>
+                    <p id="contact-feedback" class="contact-feedback" role="status" aria-live="polite" aria-atomic="true"></p>
+                </form>
+            </section>
+        </div>
+    </main>
+
+    <footer class="site-footer">
+        <div class="content-container footer-content">
+            <p><strong>Sari2</strong> &middot; Inventory Monitoring System</p>
+            <p>&copy; 2026 Sari2</p>
+        </div>
+    </footer>
+</body>
+</html>

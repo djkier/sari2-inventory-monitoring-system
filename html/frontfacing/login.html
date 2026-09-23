@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Log in to Sari2 to manage your store inventory.">
+    <title>Login | Sari2</title>
+    <link rel="stylesheet" href="../../css/style.css">
+    <link rel="stylesheet" href="../../css/public.css">
+    <script src="../../js/storage.js" defer></script>
+    <script src="../../js/auth.js" defer></script>
+</head>
+<body>
+    <header class="site-header">
+        <nav class="public-nav content-container" aria-label="Main navigation">
+            <a class="brand" href="../../index.html" aria-label="Sari2 home">Sari<span>2</span></a>
+            <div class="nav-links">
+                <a class="nav-link" href="../../index.html">Home</a>
+                <a class="nav-link" href="contact.html">Contact Us</a>
+                <a class="btn-primary nav-login" href="login.html" aria-current="page">Go to Login</a>
+            </div>
+        </nav>
+    </header>
+
+    <main class="login-section content-container">
+        <section class="login-panel" aria-labelledby="login-title">
+            <p class="eyebrow">Welcome back</p>
+            <h1 id="login-title">Log in to Sari2</h1>
+            <p class="login-introduction">Access your store's inventory with your Store Owner or Store Staff account.</p>
+            <noscript><p>Please enable JavaScript to log in.</p></noscript>
+            <form id="login-form" novalidate>
+                <fieldset id="login-fields" disabled>
+                    <legend class="visually-hidden">Login details</legend>
+                    <div class="form-group test-account-row">
+                        <label for="test-account">Test Account</label>
+                        <select id="test-account">
+                            <option value="">Select Test Account</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="login-username">Username</label>
+                        <input id="login-username" name="username" type="text" autocomplete="username" autocapitalize="none" spellcheck="false" required aria-describedby="login-username-error">
+                        <p class="field-error" id="login-username-error"></p>
+                    </div>
+                    <div class="form-group">
+                        <label for="login-password">Password</label>
+                        <input id="login-password" name="password" type="password" autocomplete="current-password" required aria-describedby="login-password-error">
+                        <p class="field-error" id="login-password-error"></p>
+                    </div>
+                    <button class="btn-primary" type="submit">Login</button>
+                </fieldset>
+                <p id="login-feedback" class="field-error" role="alert" aria-atomic="true"></p>
+            </form>
+            <p class="account-link">New to Sari2? <a href="signup.html">Create an account</a></p>
+            <a class="login-home" href="../../index.html">Back to Home</a>
+        </section>
+    </main>
+
+    <footer class="site-footer">
+        <div class="content-container footer-content">
+            <p><strong>Sari2</strong> &middot; Inventory Monitoring System</p>
+            <p>&copy; 2026 Sari2</p>
+        </div>
+    </footer>
+</body>
+</html>
