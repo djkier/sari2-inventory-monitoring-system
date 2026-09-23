@@ -148,3 +148,48 @@ textarea:focus-visible {
     padding: 10px 16px;
     border: 1px solid var(--color-border);
     border-radius: 8px;
+    background: var(--color-surface);
+    color: var(--color-primary-dark);
+    font-weight: 700;
+    transition: all 0.2s ease;
+}
+.btn-danger { color: #b91c1c; }
+.btn-secondary:hover, .btn-danger:hover { background: var(--color-background); }
+.status-badge { display: inline-block; padding: 3px 9px; border: 1px solid #00000014; border-radius: 999px; font-size: 0.75rem; font-weight: 700; background: #f1f5f9; color: #334155; white-space: nowrap; }
+.status-low-stock, .status-expiring-soon { background: #fef3c7; color: var(--color-status-warning); }
+.status-out-of-stock, .status-expired, .status-invalid-date { background: #fee2e2; color: var(--color-status-danger); }
+.status-in-stock, .status-safe { background: #dcfce7; color: #166534; }
+
+.table-scroll { overflow-x: auto; }
+.table-scroll:focus-visible { outline: 3px solid var(--color-focus); outline-offset: 3px; }
+table { width: 100%; border-collapse: collapse; text-align: left; }
+tbody tr { 
+    transition: background-color 0.2s ease; 
+}
+
+tbody tr:hover { 
+    background-color: #dbefff9f; 
+}
+
+th, td { 
+    padding: 12px; 
+    border-bottom: 1px solid var(--color-border); 
+    overflow-wrap: anywhere; }
+th { 
+    /* background: var(--color-background);  */
+    background: rgba(17, 94, 89, 0.13);
+    font-size: 0.85rem; 
+    
+}
+
+.th-centered {
+    text-align: center;
+}
+    
+.empty-state { padding: 20px; color: var(--color-text-muted); }
+
+@media (max-width: 560px) {
+    .content-container {
+        width: min(calc(100% - 28px), var(--content-width));
+    }
+}
