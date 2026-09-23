@@ -37,3 +37,37 @@ function logout() {
     window.location.replace(loginUrl);
     return true;
 }
+
+const loginForm = document.getElementById("login-form");
+if (loginForm) {
+    const accountSelect = document.getElementById("test-account");
+    testAccounts.forEach(function (account) {
+        const option = document.createElement("option");
+        option.value = account.username;
+        option.textContent = account.role;
+        accountSelect.appendChild(option);
+    });
+
+    const usernameInput = document.getElementById("login-username");
+    const passwordInput = document.getElementById("login-password");
+    const feedback = document.getElementById("login-feedback");
+    const inputs = [usernameInput, passwordInput];
+
+    accountSelect.addEventListener("change", function () {
+        const account = testAccounts.find(function (user) { return user.username === accountSelect.value; });
+        if (!account) return;
+        usernameInput.value = account.username;
+        passwordInput.value = account.password;
+        feedback.textContent = "";
+        inputs.forEach(function (input) {
+            input.removeAttribute("aria-invalid");
+            document.getElementById(input.id + "-error").textContent = "";
+        });
+    });
+
+    function validateLoginField(input) {
+        const message = input.value.trim() ? "" : "Please enter your " + input.name + ".";
+        document.getElementById(input.id + "-error").textContent = message;
+        input.setAttribute("aria-invalid", message ? "true" : "false");
+        return message === "";
+    }
