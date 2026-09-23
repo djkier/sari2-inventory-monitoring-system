@@ -6,3 +6,10 @@ document.addEventListener("DOMContentLoaded", function () {
     if (slides.length < 2 || reduceMotion) {
         return;
     }
+
+    window.setInterval(function () {
+        slides[currentSlide].classList.remove("is-active");
+        currentSlide = (currentSlide + 1) % slides.length;
+        slides[currentSlide].classList.add("is-active");
+    }, 6500);
+});
