@@ -15,7 +15,38 @@ function loadSettingsForm() {
     document.getElementById("settings-feedback").textContent = "";
 }
 
-
+settingsForm.addEventListener("submit", function (event) {
+    event.preventDefault();
+    if (!initializeApp()) return;
+    const settings = {};
+    let firstInvalid = null;
+    document.getElementById("settings-error").textContent = "";
+    document.getElementById("settings-feedback").textContent = "";
+    settingsFields.forEach(function (field) {
+        const value = field.value.trim();
+        let error = "";
+        if (field.type === "number") {
+            const number = Number(value);
+            if (!value || field.validity.badInput || !Number.isSafeInteger(number) || number < 0) {
+                error = "Enter a whole number of zero or more.";
+            }
+            settings[field.name] = number;
+        } else {
+            if (field.required && !value) error = "Enter a store name.";
+            settings[field.name] = value;
+        }
+        field.setAttribute("aria-invalid", error ? "true" : "false");
+        document.getElementById(field.id + "-error").textContent = error;
+        if (error && !firstInvalid) firstInvalid = field;
+    });
+    if (firstInvalid) { firstInvalid.focus(); return; }
+    if (!saveSettings(settings)) {
+        document.getElementById("settings-error").textContent = "Unable to save settings. Check browser storage and try again.";
+        return;
+    }
+    loadSettingsForm();
+    document.getElementById("settings-success-dialog").showModal();
+});
 
 loadSettingsForm();
 window.addEventListener("pageshow", loadSettingsForm);
