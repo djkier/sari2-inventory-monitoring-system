@@ -34,3 +34,7 @@ function refreshStock() {
     showAvailableStock();
     renderStockHistory(movements);
 }
+
+
+refreshStock();
+window.addEventListener("pageshow", refreshStock);
