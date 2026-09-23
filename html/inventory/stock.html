@@ -54,7 +54,29 @@
                         <p id="stock-feedback" role="status" aria-live="polite"></p>
                     </form>
                 </section>
-                
+                <section class="card monitoring-card" aria-labelledby="history-title">
+                    <h2 id="history-title">Stock Movement History</h2>
+                    <p>Recorded movements, newest first.</p>
+                    <div class="table-scroll" tabindex="0" role="region" aria-label="Stock movement history">
+                        <table class="stock-history-table">
+                            <thead>
+                                <tr>
+                                    <th scope="col">Date</th>
+                                    <th scope="col">Product</th>
+                                    <th scope="col">Type</th>
+                                    <th scope="col">Quantity</th>
+                                    <th scope="col">Resulting Stock</th>
+                                </tr>
+                            </thead>
+                            <tbody id="stock-history"></tbody>
+                        </table>
+                    </div>
+                    <nav id="stock-pagination" class="table-pagination" aria-label="Stock movement history pages" hidden>
+                        <button id="stock-previous" class="btn-secondary" type="button" aria-controls="stock-history">Previous</button>
+                        <span id="stock-page-info" role="status" aria-live="polite"></span>
+                        <button id="stock-next" class="btn-secondary" type="button" aria-controls="stock-history">Next</button>
+                    </nav>
+                </section>
             </main>
         </div>
     </div>
