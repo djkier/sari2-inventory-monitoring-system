@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stock Movement | Sari2</title>
+    <link rel="stylesheet" href="../../css/style.css">
+    <link rel="stylesheet" href="../../css/app.css">
+    <script src="../../js/stock-items.js" defer></script>
+    <script src="../../js/storage.js" defer></script>
+    <script src="../../js/auth.js" defer></script>
+    <script src="../../js/app.js" defer></script>
+    <script src="../../js/stock.js" defer></script>
+</head>
+<body>
+    <noscript><p>Please enable JavaScript and <a href="../frontfacing/login.html">log in</a> to access Sari2.</p></noscript>
+    <div id="app-shell" class="app-shell" hidden>
+        <aside class="app-sidebar">
+            <a class="app-brand" href="dashboard.html">Sari<span>2</span></a>
+            <p class="app-sidebar-label">Inventory management</p>
+            <nav class="app-nav" aria-label="Application navigation">
+                <a href="dashboard.html">Dashboard</a>
+                <a href="products.html">Products</a>
+                <a href="stock.html" aria-current="page">Stock Movement</a>
+                <a href="expiration.html">Expiration</a>
+            </nav>
+            <nav class="app-nav app-nav-secondary" aria-label="Account and settings">
+                <a href="settings.html">Settings</a>
+                <button id="logout-button" type="button">Logout</button>
+            </nav>
+            <p id="app-feedback" class="field-error" role="alert"></p>
+        </aside>
+        <div class="app-workspace">
+            <header class="app-header">
+                <p id="store-name"></p>
+                <div class="app-user" aria-label="Logged-in user">
+                    <strong id="current-user-name"></strong>
+                    <span id="current-user-role"></span>
+                </div>
+            </header>
+            <main class="app-content">
+                <h1>Stock Movement</h1>
+                <p class="app-introduction">Record stock entering or leaving your store and review previous movements.</p>
+                <p id="stock-warning" class="field-error" role="alert"></p>
+                <p id="stock-empty" class="card empty-state" hidden>No products available. <a href="products.html">Add a product</a> before recording a movement.</p>
+                <section class="card stock-entry" aria-labelledby="stock-form-title">
+                    <h2 id="stock-form-title">Record a movement</h2>
+                    <form id="stock-form" novalidate>
+                        <fieldset id="stock-fields" disabled>
+                            <legend class="visually-hidden">Stock movement details</legend>
+                            <div class="stock-form-grid">
+                                <div class="form-group"><label for="stock-product">Product</label><select id="stock-product" required aria-describedby="stock-available stock-error"></select><p id="stock-available"></p></div>
+                                <div class="form-group"><label for="stock-type">Transaction Type</label><select id="stock-type" required aria-describedby="stock-error"><option value="">Select transaction type</option><option value="stock-in">Stock In</option><option value="stock-out">Stock Out</option></select></div>
+                                <div class="form-group"><label for="stock-quantity">Quantity</label><input id="stock-quantity" type="number" min="1" step="1" required aria-describedby="stock-error"></div>
+                            </div>
+                            <button class="btn-primary" type="submit">Record Movement</button>
+                        </fieldset>
+                        <p id="stock-error" class="field-error" role="alert"></p>
+                        <p id="stock-feedback" role="status" aria-live="polite"></p>
+                    </form>
+                </section>
+                <section class="card monitoring-card" aria-labelledby="history-title">
+                    <h2 id="history-title">Stock Movement History</h2>
+                    <p>Recorded movements, newest first.</p>
+                    <div class="table-scroll" tabindex="0" role="region" aria-label="Stock movement history">
+                        <table class="stock-history-table">
+                            <thead>
+                                <tr>
+                                    <th scope="col">Date</th>
+                                    <th scope="col">Product</th>
+                                    <th scope="col">Type</th>
+                                    <th scope="col">Quantity</th>
+                                    <th scope="col">Resulting Stock</th>
+                                </tr>
+                            </thead>
+                            <tbody id="stock-history"></tbody>
+                        </table>
+                    </div>
+                    <nav id="stock-pagination" class="table-pagination" aria-label="Stock movement history pages" hidden>
+                        <button id="stock-previous" class="btn-secondary" type="button" aria-controls="stock-history">Previous</button>
+                        <span id="stock-page-info" role="status" aria-live="polite"></span>
+                        <button id="stock-next" class="btn-secondary" type="button" aria-controls="stock-history">Next</button>
+                    </nav>
+                </section>
+            </main>
+        </div>
+    </div>
+</body>
+</html>
