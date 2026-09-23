@@ -32,6 +32,30 @@
             </nav>
             <p id="app-feedback" class="field-error" role="alert"></p>
         </aside>
+
+        <div class="app-workspace">
+            <header class="app-header">
+                <p id="store-name"></p>
+                <div class="app-user" aria-label="Logged-in user">
+                    <strong id="current-user-name"></strong>
+                    <span id="current-user-role"></span>
+                </div>
+            </header>
+            <main class="app-content">
+                <h1>Dashboard</h1>
+                <p class="app-introduction">An overview of your inventory, stock levels, and upcoming expiration dates.</p>
+                <p id="dashboard-feedback" class="field-error" role="status"></p>
+                <p id="inventory-empty" class="card empty-state" hidden>No products found. Your inventory summary will appear here when products are available.</p>
+                <section class="summary-grid" aria-label="Inventory summary">
+                    <article class="card summary-card"><h2>Total Products</h2><p id="total-products" class="summary-value"></p></article>
+                    <article class="card summary-card summary-card-warning"><h2>Low Stock</h2><p id="low-stock-count" class="summary-value"></p></article>
+                    <article class="card summary-card summary-card-danger"><h2>Out of Stock</h2><p id="out-of-stock-count" class="summary-value"></p></article>
+                    <article class="card summary-card summary-card-warning"><h2>Expiring Soon</h2><p id="expiring-soon-count" class="summary-value"></p></article>
+                </section>
+                
+            </main>
+        </div>
+
     </div>
 
 </body>
