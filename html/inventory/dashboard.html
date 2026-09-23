@@ -17,6 +17,7 @@
 
     <noscript><p>Please enable JavaScript and <a href="../frontfacing/login.html">log in</a> to access Sari2.</p></noscript>
     <div id="app-shell" class="app-shell" hidden>
+
         <aside class="app-sidebar">
             <a class="app-brand" href="dashboard.html">Sari<span>2</span></a>
             <p class="app-sidebar-label">Inventory management</p>
@@ -26,10 +27,12 @@
                 <a href="stock.html">Stock Movement</a>
                 <a href="expiration.html">Expiration</a>
             </nav>
+
             <nav class="app-nav app-nav-secondary" aria-label="Account and settings">
                 <a href="settings.html">Settings</a>
                 <button id="logout-button" type="button">Logout</button>
             </nav>
+
             <p id="app-feedback" class="field-error" role="alert"></p>
         </aside>
 
@@ -41,6 +44,7 @@
                     <span id="current-user-role"></span>
                 </div>
             </header>
+
             <main class="app-content">
                 <h1>Dashboard</h1>
                 <p class="app-introduction">An overview of your inventory, stock levels, and upcoming expiration dates.</p>
@@ -52,7 +56,63 @@
                     <article class="card summary-card summary-card-danger"><h2>Out of Stock</h2><p id="out-of-stock-count" class="summary-value"></p></article>
                     <article class="card summary-card summary-card-warning"><h2>Expiring Soon</h2><p id="expiring-soon-count" class="summary-value"></p></article>
                 </section>
-                
+
+                <div class="monitoring-grid dashboard-monitoring">
+                    <div class="dashboard-stock-column">
+                        <section class="card monitoring-card" aria-labelledby="low-stock-title">
+                            <div class="monitoring-section-header">
+                                <h2 id="low-stock-title">Low Stock Products</h2>
+                                <a id="view-all-low-stock" class="monitoring-view-all" href="products.html?stockStatus=low-stock" hidden>View All Low Stock</a>
+                            </div>
+                            <p>Products at or below their stock threshold, excluding out-of-stock items.</p>
+                            <div class="dashboard-table" role="region" aria-label="Low stock products table">
+                                <table><thead>
+                                    <tr>
+                                        <th scope="col">Product</th>
+                                        <th scope="col" class="th-centered">
+                                            Current Stock</th>
+                                        <th scope="col" class="th-centered">Threshold</th>
+                                    </tr></thead><tbody id="low-stock-list">
+                                </tbody></table>
+                                
+                            </div>
+
+                        </section>
+                        <section class="card monitoring-card" aria-labelledby="out-of-stock-title">
+                            <div class="monitoring-section-header">
+                                <h2 id="out-of-stock-title">Out of Stock Products</h2>
+                                <a id="view-all-out-of-stock" class="monitoring-view-all" href="products.html?stockStatus=out-of-stock" hidden>View All Out of Stock</a>
+                            </div>
+                            <p>Products with no stock remaining.</p>
+                            <div class="dashboard-table" role="region" aria-label="Out of stock products table">
+                                <table><thead>
+                                    <tr>
+                                        <th scope="col">Product</th>
+                                        <th scope="col">Category</th>
+                                        <th scope="col" class="dashboard-centered">Current Stock</th>
+                                    </tr></thead><tbody id="out-of-stock-list">
+                                </tbody></table>
+
+                            </div>
+                        </section>
+                    </div>
+                    <section class="card monitoring-card" aria-labelledby="expiring-soon-title">
+                        <div class="monitoring-section-header">
+                            <h2 id="expiring-soon-title">Expiring Soon Products</h2>
+                            <a id="view-all-expiring-soon" class="monitoring-view-all" href="expiration.html?expirationStatus=expiring-soon" hidden>View All Expiring Soon</a>
+                        </div>
+                        <p id="expiration-window"></p>
+                        <div class="dashboard-table" role="region" aria-label="Expiring soon products table">
+                            <table><thead>
+                                <tr>
+                                    <th scope="col">Product</th>
+                                    <th scope="col" class="dashboard-centered">Expiration Date</th>
+                                </tr></thead><tbody id="expiring-soon-list">
+                            </tbody></table>
+
+                        </div>
+                    </section>
+                </div>
             </main>
         </div>
 
