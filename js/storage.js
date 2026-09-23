@@ -115,3 +115,41 @@ function saveStockTransaction(products, movements) {
         return false;
     }
 }
+
+function getSession() {
+    try {
+        const user = JSON.parse(localStorage.getItem(SESSION_KEY));
+        if (!user || typeof user !== "object" || Array.isArray(user) ||
+            typeof user.username !== "string" || !user.username.trim() ||
+            typeof user.name !== "string" || !user.name.trim() ||
+            typeof user.role !== "string" || !user.role.trim()) {
+            return null;
+        }
+        return { username: user.username, name: user.name, role: user.role };
+    } catch (error) {
+        return null;
+    }
+}
+
+function saveSession(user) {
+    try {
+        // Never serialize the complete account, which also contains a password.
+        localStorage.setItem(SESSION_KEY, JSON.stringify({
+            username: user.username,
+            name: user.name,
+            role: user.role
+        }));
+        return true;
+    } catch (error) {
+        return false;
+    }
+}
+
+function clearSession() {
+    try {
+        localStorage.removeItem(SESSION_KEY);
+        return true;
+    } catch (error) {
+        return false;
+    }
+}
