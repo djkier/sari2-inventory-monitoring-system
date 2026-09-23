@@ -42,3 +42,15 @@ contactForm.addEventListener("submit", function (event) {
         field.removeAttribute("aria-invalid");
     });
 });
+
+inquiryInputs.forEach(function (field) {
+    field.addEventListener("input", function () {
+        contactFeedback.textContent = "";
+        if (field.hasAttribute("aria-invalid")) {
+            validateContactField(field);
+        }
+    });
+});
+
+// Enable the form only after its submission handler is ready.
+contactFields.disabled = false;
