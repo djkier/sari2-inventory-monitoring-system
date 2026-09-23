@@ -15,3 +15,11 @@ function initializeApp() {
     shell.hidden = false;
     return user;
 }
+
+document.getElementById("logout-button").addEventListener("click", function () {
+    if (logout()) {
+        document.getElementById("app-shell").hidden = true;
+    } else {
+        document.getElementById("app-feedback").textContent = "Unable to log out. Please allow browser storage and try again.";
+    }
+});
