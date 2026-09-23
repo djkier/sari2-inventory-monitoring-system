@@ -14,4 +14,15 @@ const sampleProducts = [
     { id: "sample-sponge", name: "Scrubbing Sponge", category: "Household Supplies", price: 15, quantity: 12, lowStockThreshold: 4, expirationDate: "", imageUrl: "" }
 ];
 
-
+const sampleStockMovements = [
+    { id: "sample-move-01", productId: "sample-coke", productName: "Coca-Cola 1L", type: "stock-in", quantity: 24, date: "2026-09-17T09:00:00+08:00", resultingQuantity: 24 },
+    { id: "sample-move-02", productId: "sample-coke", productName: "Coca-Cola 1L", type: "stock-out", quantity: 6, date: "2026-09-21T16:00:00+08:00", resultingQuantity: 18 },
+    { id: "sample-move-03", productId: "sample-noodles", productName: "Lucky Me Pancit Canton 80g", type: "stock-in", quantity: 24, date: "2026-09-17T09:05:00+08:00", resultingQuantity: 24 },
+    { id: "sample-move-04", productId: "sample-noodles", productName: "Lucky Me Pancit Canton 80g", type: "stock-out", quantity: 20, date: "2026-09-21T16:05:00+08:00", resultingQuantity: 4 },
+    { id: "sample-move-05", productId: "sample-corned-beef", productName: "Argentina Corned Beef 150g", type: "stock-in", quantity: 12, date: "2026-09-17T09:10:00+08:00", resultingQuantity: 12 },
+    { id: "sample-move-06", productId: "sample-corned-beef", productName: "Argentina Corned Beef 150g", type: "stock-out", quantity: 12, date: "2026-09-21T16:10:00+08:00", resultingQuantity: 0 },
+    { id: "sample-move-07", productId: "sample-bread", productName: "Gardenia Classic Bread 400g", type: "stock-in", quantity: 10, date: "2026-09-17T09:15:00+08:00", resultingQuantity: 10 },
+    { id: "sample-move-08", productId: "sample-bread", productName: "Gardenia Classic Bread 400g", type: "stock-out", quantity: 7, date: "2026-09-21T16:15:00+08:00", resultingQuantity: 3 },
+    { id: "sample-move-09", productId: "sample-yakult", productName: "Yakult 80ml", type: "stock-in", quantity: 20, date: "2026-09-17T09:20:00+08:00", resultingQuantity: 20 },
+    { id: "sample-move-10", productId: "sample-yakult", productName: "Yakult 80ml", type: "stock-out", quantity: 20, date: "2026-09-21T16:20:00+08:00", resultingQuantity: 0 }
+];
