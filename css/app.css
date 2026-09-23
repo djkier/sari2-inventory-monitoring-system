@@ -68,13 +68,15 @@
     display: inline-flex; align-items: center; justify-content: center; flex: 0 0 44px; width: 44px; height: 44px; padding: 10px;
     border-color: transparent; background: transparent; position: relative;
 }
-.product-icon-button img { display: block; width: 20px; height: 20px; opacity: 0; }
+.product-icon-button img { 
+    display: block; width: 20px; height: 20px; opacity: 0; 
+}
 
 .products-table .btn-secondary.product-icon-button::before {
     content: ''; position: absolute; inset: 0; margin: auto; width: 20px; height: 20px;
     background-color: var(--color-primary);
-    -webkit-mask: url("../../assets/icons/pen-to-square-solid-full.svg") no-repeat center / contain;
-    mask: url("../../assets/icons/pen-to-square-solid-full.svg") no-repeat center / contain;
+    -webkit-mask: url("../assets/icons/pen-to-square-solid-full.svg") no-repeat center / contain;
+    mask: url("../assets/icons/pen-to-square-solid-full.svg") no-repeat center / contain;
     transition: background-color 0.2s ease;
 }
 .products-table .btn-secondary.product-icon-button:hover,
@@ -82,15 +84,18 @@
     background: var(--color-primary-soft); border-color: var(--color-primary-soft);
 }
 .products-table .btn-secondary.product-icon-button:hover::before,
-.products-table .btn-secondary.product-icon-button:focus-visible::before { background-color: var(--color-primary-dark); }
+.products-table .btn-secondary.product-icon-button:focus-visible::before { 
+    background-color: var(--color-primary-dark); 
+}
 
 .products-table .btn-danger.product-icon-button::before {
     content: ''; position: absolute; inset: 0; margin: auto; width: 20px; height: 20px;
     background-color: #ef4444;
-    -webkit-mask: url("../../assets/icons/trash-can-solid-full.svg") no-repeat center / contain;
-    mask: url("../../assets/icons/trash-can-solid-full.svg") no-repeat center / contain;
+    -webkit-mask: url("../assets/icons/trash-can-solid-full.svg") no-repeat center / contain;
+    mask: url("../assets/icons/trash-can-solid-full.svg") no-repeat center / contain;
     transition: background-color 0.2s ease;
 }
+
 .products-table .btn-danger.product-icon-button:hover,
 .products-table .btn-danger.product-icon-button:focus-visible {
     background: #fee2e2; border-color: #fee2e2;
