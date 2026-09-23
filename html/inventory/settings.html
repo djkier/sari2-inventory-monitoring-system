@@ -40,6 +40,29 @@
             <main class="app-content">
                 <h1>Settings</h1>
                 <p class="app-introduction">Manage your store information and inventory preferences.</p>
+                <form id="settings-form" class="settings-form" novalidate>
+                    <fieldset class="card">
+                        <legend>Store Information</legend>
+                        <div class="form-group">
+                            <label for="settings-store">Store Name</label>
+                            <input id="settings-store" name="storeName" type="text" required aria-describedby="settings-store-error">
+                            <p id="settings-store-error" class="field-error"></p>
+                        </div>
+                        <div class="form-group">
+                            <label for="settings-owner">Owner Name (optional)</label>
+                            <input id="settings-owner" name="ownerName" type="text" aria-describedby="settings-owner-error">
+                            <p id="settings-owner-error" class="field-error"></p>
+                        </div>
+                    </fieldset>
+                    
+                </form>
+                <dialog id="settings-success-dialog" class="settings-dialog" aria-labelledby="settings-success-title" aria-describedby="settings-success-message">
+                    <h2 id="settings-success-title">Settings saved</h2>
+                    <p id="settings-success-message">Your store information and inventory preferences have been saved successfully.</p>
+                    <form method="dialog">
+                        <button class="btn-primary" type="submit" autofocus>Done</button>
+                    </form>
+                </dialog>
 
             </main>
         </div>
