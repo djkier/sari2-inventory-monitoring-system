@@ -342,6 +342,10 @@
     color: var(--color-primary-dark);
 }
 
+.section-introduction .eyebrow {
+    color: rgb(15, 118, 110)
+}
+
 .contact-introduction h1 {
     margin: 0 0 20px;
     font-size: clamp(2rem, 4vw, 3rem);
