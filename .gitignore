@@ -1,0 +1,23 @@
+node_modules/
+
+# Runtime storage artifacts
+backend/data/backups/
+backend/data/*.tmp
+backend/data/.*.tmp
+
+# Local environment and secrets
+.env
+.env.*
+!.env.example
+
+# Logs and generated test output
+*.log
+coverage/
+.nyc_output/
+
+# Editor and operating-system files
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+Desktop.ini
