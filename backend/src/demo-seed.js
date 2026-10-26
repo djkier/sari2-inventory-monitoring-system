@@ -139,3 +139,26 @@ const demoSeedProducts = [
 ].map(function (product) {
     return Object.freeze({ ...product, seedSource: seedSource });
 });
+
+function seedConflict(message, details) {
+    return new AppError(500, "DEMO_SEED_CONFLICT", message, details);
+}
+
+function validateSeedDefinitions(demoStoreId) {
+    const ids = new Set();
+    const keys = new Set();
+    demoSeedProducts.forEach(function (product) {
+        if (ids.has(product.id) || keys.has(product.seedKey)) {
+            throw seedConflict("Demo seed definitions contain duplicate identities.", {
+                id: product.id,
+                seedKey: product.seedKey
+            });
+        }
+        ids.add(product.id);
+        keys.add(product.seedKey);
+        validateProductInput({ ...product, storeId: demoStoreId }, {
+            requireQuantity: true,
+            allowStoreId: true
+        });
+    });
+}
