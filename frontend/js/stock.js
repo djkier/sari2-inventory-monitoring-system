@@ -1,58 +1,93 @@
 const stockForm = document.getElementById("stock-form");
+const stockFields = document.getElementById("stock-fields");
 const stockProduct = document.getElementById("stock-product");
 const stockType = document.getElementById("stock-type");
 const stockQuantity = document.getElementById("stock-quantity");
 const stockError = document.getElementById("stock-error");
 const stockFeedback = document.getElementById("stock-feedback");
 let stockProducts = [];
-let stockSnapshot = "";
+let stockMovements = [];
+let stockLoaded = false;
+let stockLoading = false;
+let stockLoadError = "";
+let stockMutationPending = false;
 const historyPageSize = 10;
 let historyPage = 1;
 
-function refreshStock() {
-    if (!initializeApp()) return;
-    storageWarnings.length = 0;
-    const products = getProducts();
-    const movements = getStockMovements();
-    const snapshot = JSON.stringify(products);
-    const selected = snapshot === stockSnapshot ? stockProduct.value : "";
-    stockProducts = products;
-    stockSnapshot = snapshot;
+const stockLoadGuard = Sari2Api.createRequestGuard(function (pending) {
+    stockLoading = pending;
+    renderStockPage();
+});
+
+const stockMutationGuard = Sari2Api.createRequestGuard(function (pending) {
+    stockMutationPending = pending;
+    updateStockInteractionState();
+});
+
+function getStockApiErrorMessage(error, fallback) {
+    return error instanceof Sari2Api.ApiError ? error.message : fallback;
+}
+
+function updateStockInteractionState() {
+    stockFields.disabled = stockLoading || stockMutationPending || !stockLoaded || Boolean(stockLoadError) || !stockProducts.length;
+    stockForm.setAttribute("aria-busy", stockMutationPending ? "true" : "false");
+    document.getElementById("stock-previous").disabled = stockLoading || stockMutationPending || historyPage === 1;
+    const pageCount = Math.max(1, Math.ceil(stockMovements.length / historyPageSize));
+    document.getElementById("stock-next").disabled = stockLoading || stockMutationPending || historyPage === pageCount;
+}
+
+function populateStockProducts() {
+    const selectedId = stockProduct.value;
     stockProduct.replaceChildren();
     const placeholder = document.createElement("option");
     placeholder.value = "";
     placeholder.textContent = "Select a product";
     stockProduct.appendChild(placeholder);
-    products.forEach(function (product, index) {
+    stockProducts.forEach(function (product) {
         const option = document.createElement("option");
-        option.value = index;
+        option.value = product.id;
         option.textContent = product.name + " — " + product.quantity + " in stock";
         stockProduct.appendChild(option);
     });
-    stockProduct.value = selected;
-    document.getElementById("stock-fields").disabled = !products.length || storageWarnings.length > 0;
-    document.getElementById("stock-empty").hidden = products.length !== 0;
-    document.getElementById("store-name").textContent = getSettings().storeName;
-    document.getElementById("stock-warning").textContent = storageWarnings.join(" ");
-    showAvailableStock();
-    renderStockHistory(movements);
+    stockProduct.value = stockProducts.some(function (product) { return product.id === selectedId; }) ? selectedId : "";
+}
+
+function getSelectedStockProduct() {
+    return stockProducts.find(function (product) { return product.id === stockProduct.value; }) || null;
 }
 
 function showAvailableStock() {
-    const product = stockProduct.value === "" ? null : stockProducts[Number(stockProduct.value)];
-    document.getElementById("stock-available").textContent = product ? "Current stock: " + product.quantity : "Select a product to see its current stock.";
+    const product = getSelectedStockProduct();
+    document.getElementById("stock-available").textContent = product
+        ? "Current stock: " + product.quantity
+        : "Select a product to see its current stock.";
 }
 
-function renderStockHistory(movements) {
+function renderStockHistory() {
     const body = document.getElementById("stock-history");
     body.replaceChildren();
-    const pageCount = Math.max(1, Math.ceil(movements.length / historyPageSize));
+
+    if (stockLoading || stockLoadError) {
+        const row = document.createElement("tr");
+        const cell = document.createElement("td");
+        cell.colSpan = 5;
+        cell.className = "empty-state";
+        cell.textContent = stockLoading ? "Loading stock movement history..." : "Stock movement history could not be loaded.";
+        row.appendChild(cell);
+        body.appendChild(row);
+        document.getElementById("stock-pagination").hidden = true;
+        return;
+    }
+
+    const sortedMovements = stockMovements.slice().sort(function (first, second) {
+        return new Date(second.date) - new Date(first.date);
+    });
+    const pageCount = Math.max(1, Math.ceil(sortedMovements.length / historyPageSize));
     historyPage = Math.max(1, Math.min(historyPage, pageCount));
-    document.getElementById("stock-pagination").hidden = movements.length <= historyPageSize;
+    document.getElementById("stock-pagination").hidden = sortedMovements.length <= historyPageSize;
     document.getElementById("stock-page-info").textContent = "Page " + historyPage + " of " + pageCount;
-    document.getElementById("stock-previous").disabled = historyPage === 1;
-    document.getElementById("stock-next").disabled = historyPage === pageCount;
-    if (!movements.length) {
+
+    if (!sortedMovements.length) {
         const row = document.createElement("tr");
         const cell = document.createElement("td");
         cell.colSpan = 5;
@@ -62,8 +97,7 @@ function renderStockHistory(movements) {
         body.appendChild(row);
         return;
     }
-    // Sort and paginate a copy; all stored movement records remain untouched.
-    const sortedMovements = movements.slice().sort(function (a, b) { return new Date(b.date) - new Date(a.date); });
+
     const start = (historyPage - 1) * historyPageSize;
     sortedMovements.slice(start, start + historyPageSize).forEach(function (movement) {
         const row = document.createElement("tr");
@@ -78,22 +112,69 @@ function renderStockHistory(movements) {
                 badge.className = "status-badge " + (stockIn ? "status-in-stock" : "status-low-stock");
                 badge.textContent = value;
                 cell.appendChild(badge);
-            } else cell.textContent = value;
+            } else {
+                cell.textContent = value;
+            }
             row.appendChild(cell);
         });
         body.appendChild(row);
     });
 }
 
-stockForm.addEventListener("submit", function (event) {
+function renderStockPage() {
+    populateStockProducts();
+    document.getElementById("stock-empty").hidden = !stockLoaded || stockProducts.length !== 0;
+    showAvailableStock();
+    renderStockHistory();
+    updateStockInteractionState();
+}
+
+async function requestStockData() {
+    const results = await Promise.all([
+        Sari2Api.request("products"),
+        Sari2Api.request("stock-movements")
+    ]);
+    if (!Array.isArray(results[0]) || !Array.isArray(results[1])) {
+        throw new Sari2Api.ApiError("INVALID_RESPONSE", "The server returned invalid inventory data.");
+    }
+    return { products: results[0], movements: results[1] };
+}
+
+async function refreshStock() {
+    if (!initializeApp()) return false;
+    stockLoadError = "";
+    document.getElementById("stock-warning").textContent = "Loading inventory and movement history...";
+
+    return stockLoadGuard.run(async function () {
+        try {
+            const data = await requestStockData();
+            stockProducts = data.products;
+            stockMovements = data.movements;
+            stockLoaded = true;
+            stockLoadError = "";
+            document.getElementById("stock-warning").textContent = "";
+            return true;
+        } catch (error) {
+            stockProducts = [];
+            stockMovements = [];
+            stockLoaded = false;
+            stockLoadError = getStockApiErrorMessage(error, "Unable to load inventory and movement history.");
+            document.getElementById("stock-warning").textContent = stockLoadError;
+            return false;
+        }
+    });
+}
+
+stockForm.addEventListener("submit", async function (event) {
     event.preventDefault();
-    if (!initializeApp()) return;
+    if (!initializeApp() || stockMutationPending || !stockLoaded) return;
     stockError.textContent = "";
     stockFeedback.textContent = "";
-    const index = Number(stockProduct.value);
+    const product = getSelectedStockProduct();
     const type = stockType.value;
     const quantity = Number(stockQuantity.value);
-    if (stockProduct.value === "" || !Number.isInteger(index) || !stockProducts[index]) {
+
+    if (!product) {
         stockError.textContent = "Please select a product.";
         stockProduct.focus();
         return;
@@ -108,55 +189,58 @@ stockForm.addEventListener("submit", function (event) {
         stockQuantity.focus();
         return;
     }
-    storageWarnings.length = 0;
-    const products = getProducts();
-    const movements = getStockMovements();
-    if (storageWarnings.length) {
-        stockError.textContent = "Cannot record a movement while saved data is unreadable. " + storageWarnings.join(" ");
-        return;
-    }
-    if (JSON.stringify(products) !== stockSnapshot) {
-        refreshStock();
-        stockError.textContent = "Inventory changed. Select the product again and check its current stock.";
-        return;
-    }
-    const product = products[index];
-    if (type === "stock-out" && quantity > product.quantity) {
-        stockError.textContent = "Insufficient stock.";
-        stockQuantity.focus();
-        return;
-    }
-    const resultingQuantity = product.quantity + (type === "stock-in" ? quantity : -quantity);
-    if (!Number.isSafeInteger(resultingQuantity)) {
-        stockError.textContent = "The resulting stock quantity is too large.";
-        return;
-    }
-    products[index] = { ...product, quantity: resultingQuantity };
-    movements.push({ ...(product.id ? { productId: product.id } : {}),
-        productName: product.name, type: type, quantity: quantity,
-        date: new Date().toISOString(), resultingQuantity: resultingQuantity });
-    if (!saveStockTransaction(products, movements)) {
-        stockError.textContent = "Unable to save the stock movement. Check browser storage and try again. " + storageWarnings.join(" ");
-        return;
-    }
-    stockForm.reset();
-    historyPage = 1;
-    refreshStock();
-    stockFeedback.textContent = (type === "stock-in" ? "Stock In" : "Stock Out") + " recorded for " + product.name + ". Current stock: " + resultingQuantity + ".";
+
+    await stockMutationGuard.run(async function () {
+        try {
+            const result = await Sari2Api.request("stock-movements", {
+                method: "POST",
+                body: { productId: product.id, type: type, quantity: quantity }
+            });
+            if (!result || !result.product || !result.movement) {
+                throw new Sari2Api.ApiError("INVALID_RESPONSE", "The server returned an invalid stock transaction result.");
+            }
+
+            stockProducts = stockProducts.map(function (item) {
+                return item.id === result.product.id ? result.product : item;
+            });
+            stockMovements = [result.movement].concat(stockMovements.filter(function (movement) {
+                return movement.id !== result.movement.id;
+            }));
+            stockForm.reset();
+            historyPage = 1;
+            try {
+                const data = await requestStockData();
+                stockProducts = data.products;
+                stockMovements = data.movements;
+            } catch (reloadError) {
+                document.getElementById("stock-warning").textContent =
+                    "The movement was recorded, but the latest inventory could not be reloaded. " +
+                    getStockApiErrorMessage(reloadError, "Refresh the page to try again.");
+            }
+            renderStockPage();
+            stockFeedback.textContent = (result.movement.type === "stock-in" ? "Stock In" : "Stock Out") +
+                " recorded for " + result.movement.productName + ". Current stock: " + result.movement.resultingQuantity + ".";
+        } catch (error) {
+            stockError.textContent = getStockApiErrorMessage(error, "Unable to record the stock movement. Try again.");
+        }
+    });
 });
 
 stockProduct.addEventListener("change", showAvailableStock);
 document.getElementById("stock-previous").addEventListener("click", function () {
     historyPage -= 1;
-    refreshStock();
+    renderStockHistory();
+    updateStockInteractionState();
 });
 document.getElementById("stock-next").addEventListener("click", function () {
     historyPage += 1;
-    refreshStock();
+    renderStockHistory();
+    updateStockInteractionState();
 });
-stockForm.addEventListener("input", function () { stockError.textContent = ""; stockFeedback.textContent = ""; });
+stockForm.addEventListener("input", function () {
+    stockError.textContent = "";
+    stockFeedback.textContent = "";
+});
+
 refreshStock();
 window.addEventListener("pageshow", refreshStock);
-window.addEventListener("storage", function (event) {
-    if (["sari2_products", "sari2_stock_movements", "sari2_settings", null].includes(event.key)) refreshStock();
-});
