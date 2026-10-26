@@ -229,6 +229,16 @@ function updateSessionStoreIdentity(store) {
     }
 }
 
+function updateSessionUserIdentity(user) {
+    for (const session of sessions.values()) {
+        if (session.identity.user.id !== user.id) continue;
+        session.identity = {
+            ...session.identity,
+            user: { ...session.identity.user, name: user.name }
+        };
+    }
+}
+
 module.exports = {
     authenticate,
     createSession,
@@ -238,5 +248,6 @@ module.exports = {
     requireAuthentication,
     safeIdentity,
     updateSessionStoreIdentity,
+    updateSessionUserIdentity,
     validateLogin
 };

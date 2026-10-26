@@ -1,6 +1,6 @@
 const { AppError } = require("./errors");
 const { listProducts } = require("./products");
-const { getSettings } = require("./settings");
+const { getInventorySettings } = require("./settings");
 
 const scopeFields = ["storeId", "storeCode", "code"];
 
@@ -175,7 +175,7 @@ function buildDashboardData(monitoring) {
 async function getMonitoringData(storeId) {
     const [products, settings] = await Promise.all([
         listProducts(storeId),
-        getSettings(storeId, "Store Staff")
+        getInventorySettings(storeId)
     ]);
     return buildMonitoringData(products, settings);
 }

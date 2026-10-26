@@ -18,7 +18,8 @@ function getAppSettings(forceRefresh = false) {
 }
 
 function renderAppContext(identity, settings) {
-    document.getElementById("current-user-name").textContent = identity.user.name;
+    const settingsAccountName = identity.user.role === "Store Owner" ? settings.ownerName : settings.staffName;
+    document.getElementById("current-user-name").textContent = settingsAccountName || identity.user.name;
     document.getElementById("current-user-role").textContent = identity.user.role;
     const storeName = settings.storeName || identity.store.name;
     const storeCode = identity.user.role === "Store Owner" && /^\d{6}$/.test(settings.storeCode || "")

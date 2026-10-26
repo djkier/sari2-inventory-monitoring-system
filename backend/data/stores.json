@@ -5,5 +5,12 @@
     "normalizedName": "sari2 demo store",
     "code": "000000",
     "ownerUserId": "00000000-0000-4000-8000-000000000101"
+  },
+  {
+    "id": "c6ae94f1-32e7-4791-b875-c0f71caae2cf",
+    "name": "Hello",
+    "normalizedName": "hello",
+    "code": "607787",
+    "ownerUserId": "2b6e09af-83c4-4d3d-a96f-2e907106c2b1"
   }
 ]
