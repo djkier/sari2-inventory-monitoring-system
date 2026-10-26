@@ -1,0 +1,112 @@
+[
+  {
+    "id": "798b024f-858a-47d1-acff-ef8faa4dbf7f",
+    "storeId": "00000000-0000-4000-8000-000000000001",
+    "productId": "10000000-0000-4000-8000-000000000003",
+    "productName": "Argentina Corned Beef 150g",
+    "type": "stock-in",
+    "quantity": 5,
+    "date": "2026-10-25T11:20:46.224Z",
+    "resultingQuantity": 5
+  },
+  {
+    "id": "f5a9604f-806b-4891-8024-d8435c3111d8",
+    "storeId": "00000000-0000-4000-8000-000000000001",
+    "productId": "10000000-0000-4000-8000-000000000002",
+    "productName": "Lucky Me Pancit Canton 80g",
+    "type": "stock-out",
+    "quantity": 1,
+    "date": "2026-10-25T11:26:36.427Z",
+    "resultingQuantity": 3
+  },
+  {
+    "id": "20fb759c-cbdd-4201-b967-4022a8bcdcce",
+    "storeId": "00000000-0000-4000-8000-000000000001",
+    "productId": "10000000-0000-4000-8000-000000000012",
+    "productName": "Scrubbing Sponge",
+    "type": "stock-out",
+    "quantity": 1,
+    "date": "2026-10-25T11:26:48.984Z",
+    "resultingQuantity": 11
+  },
+  {
+    "id": "b459106f-0a27-4889-b442-8657ba2eec86",
+    "storeId": "00000000-0000-4000-8000-000000000001",
+    "productId": "10000000-0000-4000-8000-000000000005",
+    "productName": "Nestle Fresh Milk 1L",
+    "type": "stock-in",
+    "quantity": 9,
+    "date": "2026-10-25T11:27:05.218Z",
+    "resultingQuantity": 17
+  },
+  {
+    "id": "c20dfb3e-b875-40cc-9a3b-85636cf494c7",
+    "storeId": "00000000-0000-4000-8000-000000000001",
+    "productId": "10000000-0000-4000-8000-000000000008",
+    "productName": "Rebisco Crackers 32g",
+    "type": "stock-out",
+    "quantity": 12,
+    "date": "2026-10-25T11:27:26.761Z",
+    "resultingQuantity": 8
+  },
+  {
+    "id": "9211f17d-4aff-4169-a0e4-60f7df67c0b2",
+    "storeId": "00000000-0000-4000-8000-000000000001",
+    "productId": "10000000-0000-4000-8000-000000000008",
+    "productName": "Rebisco Crackers 32g",
+    "type": "stock-in",
+    "quantity": 14,
+    "date": "2026-10-25T11:27:39.558Z",
+    "resultingQuantity": 22
+  },
+  {
+    "id": "129c8e20-cff0-4f59-8eb4-f0ba8c29772f",
+    "storeId": "00000000-0000-4000-8000-000000000001",
+    "productId": "10000000-0000-4000-8000-000000000002",
+    "productName": "Lucky Me Pancit Canton 80g",
+    "type": "stock-out",
+    "quantity": 1,
+    "date": "2026-10-25T11:27:49.419Z",
+    "resultingQuantity": 2
+  },
+  {
+    "id": "f330af29-66e7-4210-a787-74ce375adb7a",
+    "storeId": "00000000-0000-4000-8000-000000000001",
+    "productId": "10000000-0000-4000-8000-000000000002",
+    "productName": "Lucky Me Pancit Canton 80g",
+    "type": "stock-in",
+    "quantity": 5,
+    "date": "2026-10-25T11:27:57.943Z",
+    "resultingQuantity": 7
+  },
+  {
+    "id": "78b18c0c-feb2-40e4-bec7-0767522a69d4",
+    "storeId": "00000000-0000-4000-8000-000000000001",
+    "productId": "10000000-0000-4000-8000-000000000006",
+    "productName": "Yakult 80ml",
+    "type": "stock-in",
+    "quantity": 48,
+    "date": "2026-10-25T11:28:13.787Z",
+    "resultingQuantity": 48
+  },
+  {
+    "id": "4488f7a3-bf11-4945-aa81-83525d0ab3c3",
+    "storeId": "00000000-0000-4000-8000-000000000001",
+    "productId": "10000000-0000-4000-8000-000000000007",
+    "productName": "Fudgee Barr Chocolate 40g",
+    "type": "stock-in",
+    "quantity": 3,
+    "date": "2026-10-25T11:28:46.033Z",
+    "resultingQuantity": 5
+  },
+  {
+    "id": "85948956-5d30-40b0-9759-3897c9055b9b",
+    "storeId": "00000000-0000-4000-8000-000000000001",
+    "productId": "10000000-0000-4000-8000-000000000011",
+    "productName": "Plastic Sando Bags Pack of 100",
+    "type": "stock-in",
+    "quantity": 10,
+    "date": "2026-10-25T11:29:12.614Z",
+    "resultingQuantity": 12
+  }
+]
