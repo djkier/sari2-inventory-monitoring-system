@@ -1,57 +1,82 @@
-function renderDashboard() {
-    if (!initializeApp()) {
-        return;
-    }
-    storageWarnings.length = 0;
-    const settings = getSettings();
-    const products = getProducts();
-    const today = new Date();
+const dashboardContent = document.querySelector(".app-content");
+const dashboardFeedback = document.getElementById("dashboard-feedback");
+let dashboardData = null;
+let dashboardLoaded = false;
 
-    const lowStock = products.filter(function (product) {
-        return getStockStatus(product, settings) === "Low Stock";
+function setDashboardPending(isPending) {
+    dashboardContent.setAttribute("aria-busy", isPending ? "true" : "false");
+    if (isPending && !dashboardLoaded) renderDashboardUnavailable("Loading dashboard data...");
+}
+
+const dashboardRequest = Sari2Api.createRequestGuard(setDashboardPending);
+
+function renderDashboardUnavailable(message) {
+    ["total-products", "low-stock-count", "expiring-soon-count", "out-of-stock-count"].forEach(function (id) {
+        document.getElementById(id).textContent = "—";
     });
+    document.getElementById("expiration-window").textContent = "";
+    document.getElementById("inventory-empty").hidden = true;
+    document.getElementById("view-all-low-stock").hidden = true;
+    document.getElementById("view-all-out-of-stock").hidden = true;
+    document.getElementById("view-all-expiring-soon").hidden = true;
+    renderMonitoringRows("low-stock-list", [], message, 3, 0);
+    renderMonitoringRows("out-of-stock-list", [], message, 3, 0);
+    renderMonitoringRows("expiring-soon-list", [], message, 2, 0);
+}
 
-    const expiringSoon = products.filter(function (product) {
-        return getExpirationStatus(product, settings.expirationWarningDays, today) === "Expiring Soon";
-    });
+function renderDashboard(data) {
+    const summary = data.summary;
+    const monitoring = data.monitoring;
 
-    const outOfStock = products.filter(function (product) {
-        return getStockStatus(product, settings) === "Out of Stock";
-    });
+    document.getElementById("total-products").textContent = summary.totalProducts;
+    document.getElementById("low-stock-count").textContent = summary.lowStock;
+    document.getElementById("expiring-soon-count").textContent = summary.expiringSoon;
+    document.getElementById("out-of-stock-count").textContent = summary.outOfStock;
+    document.getElementById("expiration-window").textContent =
+        "Today and the next " + data.expirationWarningDays + " days.";
+    document.getElementById("inventory-empty").hidden = summary.totalProducts !== 0;
 
-    document.getElementById("store-name").textContent = settings.storeName;
-    document.getElementById("total-products").textContent = products.length;
-    document.getElementById("low-stock-count").textContent = lowStock.length;
-    document.getElementById("expiring-soon-count").textContent = expiringSoon.length;
-    document.getElementById("out-of-stock-count").textContent = outOfStock.length;
-    document.getElementById("expiration-window").textContent = "Today and the next " + settings.expirationWarningDays + " days.";
-    document.getElementById("inventory-empty").hidden = products.length !== 0;
+    document.getElementById("view-all-low-stock").hidden = summary.lowStock === 0;
+    document.getElementById("view-all-out-of-stock").hidden = summary.outOfStock === 0;
+    document.getElementById("view-all-expiring-soon").hidden = summary.expiringSoon === 0;
 
-    document.getElementById("view-all-low-stock").hidden = lowStock.length === 0;
-    document.getElementById("view-all-out-of-stock").hidden = outOfStock.length === 0;
-    document.getElementById("view-all-expiring-soon").hidden = expiringSoon.length === 0;
+    renderMonitoringRows("low-stock-list", monitoring.lowStock.slice(0, 3).map(function (product) {
+        return [product.name, product.quantity, product.lowStockThreshold];
+    }), "No low-stock products.", 3, summary.lowStock);
 
-    lowStock.sort(function (a, b) { return a.quantity - b.quantity || a.name.localeCompare(b.name); });
-    outOfStock.sort(function (a, b) { return a.name.localeCompare(b.name); });
-
-    renderMonitoringRows("low-stock-list", lowStock.slice(0, 3).map(function (product) {
-        return [product.name, product.quantity, getLowStockThreshold(product, settings)];
-    }), "No low-stock products.", 3, lowStock.length);
-
-    renderMonitoringRows("out-of-stock-list", outOfStock.slice(0, 3).map(function (product) {
+    renderMonitoringRows("out-of-stock-list", monitoring.outOfStock.slice(0, 3).map(function (product) {
         return [product.name, product.category || "N/A", product.quantity];
-    }), "No out-of-stock products.", 3, outOfStock.length);
+    }), "No out-of-stock products.", 3, summary.outOfStock);
 
-    expiringSoon.sort(function (a, b) { return a.expirationDate.localeCompare(b.expirationDate); });
-
-    renderExpiringSoonPreview(expiringSoon.map(function (product) {
+    renderExpiringSoonPreview(monitoring.expiringSoon.map(function (product) {
         return [product.name, formatExpirationDate(product.expirationDate)];
     }));
+}
 
-    if (products.some(function (product) { return getExpirationStatus(product, settings.expirationWarningDays, today) === "Invalid Date"; })) {
-        storageWarnings.push("Some products have invalid expiration dates and are excluded from expiration monitoring.");
+async function loadDashboard(forceRefresh = false) {
+    dashboardFeedback.textContent = "";
+    try {
+        const data = await dashboardRequest.run(async function () {
+            const context = forceRefresh ? await initializeApp(true) : await appReady;
+            if (!context) return null;
+            return Sari2Api.request("/dashboard");
+        });
+        if (!data) {
+            dashboardData = null;
+            dashboardLoaded = false;
+            renderDashboardUnavailable("Dashboard data is unavailable.");
+            return;
+        }
+        dashboardData = data;
+        dashboardLoaded = true;
+        renderDashboard(data);
+    } catch (error) {
+        dashboardData = null;
+        dashboardLoaded = false;
+        renderDashboardUnavailable("Dashboard data is unavailable.");
+        dashboardFeedback.textContent = error.message ||
+            "Unable to load dashboard data. Check the server and try again.";
     }
-    document.getElementById("dashboard-feedback").textContent = storageWarnings.join(" ");
 }
 
 function renderExpiringSoonPreview(rows) {
@@ -110,7 +135,7 @@ function renderMonitoringRows(targetId, rows, emptyMessage, columnCount, totalCo
         });
         body.appendChild(row);
     });
-    
+
     const remaining = totalCount - rows.length;
 
     if (remaining > 0) {
@@ -124,17 +149,20 @@ function renderMonitoringRows(targetId, rows, emptyMessage, columnCount, totalCo
     }
 }
 
-renderDashboard();
-window.addEventListener("pageshow", renderDashboard);
-window.addEventListener("focus", renderDashboard);
+loadDashboard();
+window.addEventListener("pageshow", function (event) {
+    if (event.persisted) loadDashboard(true);
+});
+window.addEventListener("focus", function () {
+    loadDashboard(true);
+});
 let dashboardResizeFrame;
 window.addEventListener("resize", function () {
     window.cancelAnimationFrame(dashboardResizeFrame);
-    dashboardResizeFrame = window.requestAnimationFrame(renderDashboard);
+    dashboardResizeFrame = window.requestAnimationFrame(function () {
+        if (dashboardData) renderDashboard(dashboardData);
+    });
 });
-if (document.fonts) document.fonts.ready.then(renderDashboard);
-window.addEventListener("storage", function (event) {
-    if (event.key === "sari2_products" || event.key === "sari2_settings" || event.key === null) {
-        renderDashboard();
-    }
+if (document.fonts) document.fonts.ready.then(function () {
+    if (dashboardData) renderDashboard(dashboardData);
 });
