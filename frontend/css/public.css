@@ -89,6 +89,28 @@
     width: 100%;
 }
 
+.signup-feedback:not(:empty) {
+    margin: 18px 0 0;
+    padding: 12px 14px;
+    border-radius: 8px;
+}
+
+.signup-feedback.is-error {
+    background: #fef2f2;
+    color: var(--color-status-danger);
+}
+
+.signup-feedback.is-success {
+    background: #ecfdf5;
+    color: var(--color-primary-dark);
+}
+
+#signup-store-code-help {
+    margin: 6px 0 0;
+    color: var(--color-text-muted);
+    font-size: 0.85rem;
+}
+
 .login-home {
     display: inline-block;
     margin-top: 24px;
@@ -401,6 +423,11 @@
     border-radius: 8px;
     background: #ecfdf5;
     color: var(--color-primary-dark);
+}
+
+.contact-feedback.is-error:not(:empty) {
+    background: #fef2f2;
+    color: #991b1b;
 }
 
 @media (max-width: 760px) {
