@@ -7,6 +7,7 @@
     <title>Sign Up | Sari2</title>
     <link rel="stylesheet" href="../../css/style.css">
     <link rel="stylesheet" href="../../css/public.css">
+    <script src="../../js/api.js" defer></script>
     <script src="../../js/auth.js" defer></script>
 </head>
 <body>
@@ -24,7 +25,7 @@
         <section class="login-panel" aria-labelledby="signup-title">
             <p class="eyebrow">Welcome to Sari2</p>
             <h1 id="signup-title">Create an account</h1>
-            <p class="login-introduction">Enter your details and choose your account type. All fields are required.</p>
+            <p class="login-introduction">Create a store as an Owner or join one as Staff using its six-digit code.</p>
             <noscript><p>Please enable JavaScript to use this form.</p></noscript>
             <form id="signup-form" novalidate>
                 <fieldset id="signup-fields" disabled>
@@ -58,8 +59,20 @@
                         </select>
                         <p class="field-error" id="signup-role-error"></p>
                     </div>
-                    <button class="btn-primary" type="submit">Sign Up</button>
+                    <div class="form-group">
+                        <label for="signup-store-name">Store Name</label>
+                        <input id="signup-store-name" name="storeName" type="text" autocomplete="organization" required aria-describedby="signup-store-name-error">
+                        <p class="field-error" id="signup-store-name-error"></p>
+                    </div>
+                    <div class="form-group" id="signup-store-code-group" hidden>
+                        <label for="signup-store-code">Store Code</label>
+                        <input id="signup-store-code" name="storeCode" type="text" inputmode="numeric" pattern="[0-9]{6}" maxlength="6" autocomplete="off" aria-describedby="signup-store-code-help signup-store-code-error" disabled>
+                        <p id="signup-store-code-help">Ask your Store Owner for the six-digit code.</p>
+                        <p class="field-error" id="signup-store-code-error"></p>
+                    </div>
+                    <button id="signup-submit" class="btn-primary" type="submit">Sign Up</button>
                 </fieldset>
+                <p id="signup-feedback" class="signup-feedback" role="status" aria-live="polite" aria-atomic="true"></p>
             </form>
             <a class="login-home" href="login.html">Return to Login</a>
         </section>
