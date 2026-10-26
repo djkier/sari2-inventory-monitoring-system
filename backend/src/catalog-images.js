@@ -50,3 +50,29 @@ function getManagedImagePath(fileName) {
     }
     return filePath;
 }
+
+async function initializeImageStorage() {
+    await fs.mkdir(imageDirectory, { recursive: true });
+}
+
+async function removeManagedImage(fileName) {
+    if (!fileName) return;
+    await fs.rm(getManagedImagePath(fileName), { force: true });
+}
+
+function validateImageUpload(buffer, contentType) {
+    const mimeType = normalizeMimeType(contentType);
+    if (!Object.prototype.hasOwnProperty.call(imageTypes, mimeType)) {
+        throw new AppError(415, "UNSUPPORTED_IMAGE_TYPE", "Upload a JPEG, PNG, WebP, or GIF image.");
+    }
+    if (!Buffer.isBuffer(buffer) || buffer.length === 0) {
+        throw new AppError(400, "EMPTY_IMAGE", "Choose a nonempty image file to upload.");
+    }
+    if (buffer.length > maxImageBytes) {
+        throw new AppError(413, "IMAGE_TOO_LARGE", "Image files must be 5 MB or smaller.");
+    }
+    if (!hasImageSignature(buffer, mimeType)) {
+        throw new AppError(415, "INVALID_IMAGE_CONTENT", "The file content does not match its image type.");
+    }
+    return mimeType;
+}
