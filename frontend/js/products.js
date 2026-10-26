@@ -624,3 +624,70 @@ async function deleteProduct(productId) {
         }
     });
 }
+
+document.getElementById("add-product").addEventListener("click", function () { openProductEditor(); });
+catalogSelect.addEventListener("change", function () {
+    if (!findCatalogProduct(catalogSelect.value) && editingId === null) {
+        productInput("name").value = "";
+        productInput("imageUrl").value = "";
+    }
+    syncCatalogFields();
+    ["catalogProductId", "name", "imageUrl"].forEach(function (fieldName) {
+        const field = productInput(fieldName);
+        field.removeAttribute("aria-invalid");
+        productFieldError(fieldName).textContent = "";
+    });
+    if (!productInput("name").readOnly) productInput("name").focus();
+});
+imageFileInput.addEventListener("change", function () {
+    productFieldError("imageFile").textContent = "";
+    imageFileInput.removeAttribute("aria-invalid");
+    syncCatalogFields();
+});
+productInput("category").addEventListener("change", function () {
+    if (productInput("category").value === "new") openCategoryDialog();
+});
+manageCategoriesButton.addEventListener("click", function () {
+    const selectedId = productInput("category").value;
+    openCategoryDialog(findCategory(selectedId) ? selectedId : "");
+});
+document.getElementById("cancel-product").addEventListener("click", closeProductEditor);
+document.getElementById("product-search").addEventListener("input", function () {
+    productPage = 1;
+    renderProducts();
+});
+["stock-filter", "expiration-filter"].forEach(function (id) {
+    document.getElementById(id).addEventListener("change", function () {
+        productPage = 1;
+        renderProducts();
+    });
+});
+document.getElementById("products-previous").addEventListener("click", function () {
+    productPage -= 1;
+    renderProducts();
+});
+document.getElementById("products-next").addEventListener("click", function () {
+    productPage += 1;
+    renderProducts();
+});
+// Initialize the existing controls once; later manual changes and refreshes keep their values.
+function initializeProductFiltersFromUrl() {
+    const parameters = new URLSearchParams(window.location.search);
+    [["stockStatus", "stock-filter"], ["expirationStatus", "expiration-filter"]].forEach(function (entry) {
+        const filter = document.getElementById(entry[1]);
+        const requested = parameters.get(entry[0]);
+        const option = Array.from(filter.options).find(function (item) {
+            return item.value && item.value.toLowerCase().replaceAll(" ", "-") === requested;
+        });
+        if (option) filter.value = option.value;
+    });
+}
+
+initializeProductFiltersFromUrl();
+refreshProducts();
+window.addEventListener("pageshow", function (event) {
+    if (event.persisted) refreshProducts(true);
+});
+window.addEventListener("focus", function () {
+    refreshProducts(true);
+});
