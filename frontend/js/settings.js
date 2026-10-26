@@ -9,11 +9,14 @@ const staffNameInput = document.getElementById("settings-staff");
 const thresholdInput = document.getElementById("settings-threshold");
 const warningInput = document.getElementById("settings-warning");
 const successMessage = document.getElementById("settings-success-message");
-const categorySection = document.getElementById("category-settings");
-const categoryList = document.getElementById("category-list");
+const manageCategoriesButton = document.getElementById("manage-categories");
 const categoryFeedback = document.getElementById("category-feedback");
 const addCategoryButton = document.getElementById("add-category");
 const categoryDialog = document.getElementById("category-dialog");
+const categorySelect = document.getElementById("category-select");
+const deleteCategoryButton = document.getElementById("delete-category");
+const editCategoryButton = document.getElementById("edit-category");
+const categoryEditorDialog = document.getElementById("category-editor-dialog");
 const categoryForm = document.getElementById("category-form");
 const categoryNameInput = document.getElementById("category-name");
 const categoryNameError = document.getElementById("category-name-error");
@@ -23,7 +26,6 @@ let categories = [];
 let categoriesLoaded = false;
 let categoryRequestPending = false;
 let editingCategoryId = null;
-let categoryReturnFocus = null;
 
 function setSettingsPending(isPending, label) {
     settingsFieldsets.forEach(function (fieldset) { fieldset.disabled = isPending; });
@@ -94,12 +96,17 @@ const settingsSaveRequest = Sari2Api.createRequestGuard(function (isPending) {
 
 const categoryRequest = Sari2Api.createRequestGuard(function (isPending) {
     categoryRequestPending = isPending;
-    categorySection.setAttribute("aria-busy", isPending ? "true" : "false");
-    addCategoryButton.disabled = isPending || !categoriesLoaded;
-    categoryForm.querySelectorAll("input, button").forEach(function (control) {
+    categoryDialog.setAttribute("aria-busy", isPending ? "true" : "false");
+    categoryEditorDialog.setAttribute("aria-busy", isPending ? "true" : "false");
+    manageCategoriesButton.disabled = isPending;
+    categoryDialog.querySelectorAll("button").forEach(function (control) {
         control.disabled = isPending;
     });
-    renderCategoryList();
+    addCategoryButton.disabled = isPending || !categoriesLoaded;
+    categoryEditorDialog.querySelectorAll("input, button").forEach(function (control) {
+        control.disabled = isPending;
+    });
+    renderCategoryOptions(categorySelect.value);
 });
 
 settingsForm.addEventListener("submit", async function (event) {
@@ -181,62 +188,32 @@ function setCategoryFeedback(message, isError) {
     categoryFeedback.classList.toggle("field-error", Boolean(isError));
 }
 
-function renderCategoryList() {
-    categoryList.replaceChildren();
-    if (!categoriesLoaded) {
-        const row = document.createElement("tr");
-        const cell = document.createElement("td");
-        cell.colSpan = 2;
-        cell.textContent = categoryRequestPending ? "Loading categories..." : "Categories are unavailable.";
-        row.appendChild(cell);
-        categoryList.appendChild(row);
-        return;
-    }
-    if (!categories.length) {
-        const row = document.createElement("tr");
-        const cell = document.createElement("td");
-        cell.colSpan = 2;
-        cell.textContent = "No categories have been added yet.";
-        row.appendChild(cell);
-        categoryList.appendChild(row);
-        return;
-    }
-
+function renderCategoryOptions(selectedCategoryId = "") {
+    categorySelect.replaceChildren();
+    const placeholder = document.createElement("option");
+    placeholder.value = "";
+    placeholder.textContent = categoryRequestPending ? "Loading categories..." :
+        (!categoriesLoaded ? "Categories unavailable" :
+            (categories.length ? "Select a category" : "No categories available"));
+    categorySelect.appendChild(placeholder);
     categories.forEach(function (category) {
-        const row = document.createElement("tr");
-        const nameCell = document.createElement("td");
-        const actionsCell = document.createElement("td");
-        const actions = document.createElement("div");
-        const editButton = document.createElement("button");
-        const deleteButton = document.createElement("button");
-
-        nameCell.textContent = category.name;
-        actions.className = "category-settings-actions";
-        editButton.type = "button";
-        editButton.className = "btn-secondary";
-        editButton.dataset.action = "edit";
-        editButton.dataset.categoryId = category.id;
-        editButton.textContent = "Edit";
-        editButton.disabled = categoryRequestPending;
-        deleteButton.type = "button";
-        deleteButton.className = "btn-danger";
-        deleteButton.dataset.action = "delete";
-        deleteButton.dataset.categoryId = category.id;
-        deleteButton.textContent = "Delete";
-        deleteButton.disabled = categoryRequestPending;
-
-        actions.append(editButton, deleteButton);
-        actionsCell.appendChild(actions);
-        row.append(nameCell, actionsCell);
-        categoryList.appendChild(row);
+        const option = document.createElement("option");
+        option.value = category.id;
+        option.textContent = category.name;
+        categorySelect.appendChild(option);
     });
+    categorySelect.value = findCategory(selectedCategoryId) ? selectedCategoryId : "";
+    categorySelect.disabled = categoryRequestPending || !categoriesLoaded || !categories.length;
+    const hasSelection = Boolean(findCategory(categorySelect.value));
+    deleteCategoryButton.disabled = categoryRequestPending || !hasSelection;
+    editCategoryButton.disabled = categoryRequestPending || !hasSelection;
 }
 
 async function loadCategories() {
     if (categoryRequest.isPending) return;
     categoriesLoaded = false;
     setCategoryFeedback("", false);
-    renderCategoryList();
+    renderCategoryOptions();
     await categoryRequest.run(async function () {
         try {
             const context = await appReady;
@@ -259,22 +236,39 @@ async function loadCategories() {
     });
 }
 
-function openCategoryDialog(categoryId, trigger) {
+function openCategoryManagement() {
+    if (categoryRequestPending) return;
+    if (categoriesLoaded) setCategoryFeedback("", false);
+    renderCategoryOptions(categorySelect.value);
+    categoryDialog.showModal();
+    if (!categorySelect.disabled) categorySelect.focus();
+    else document.getElementById("cancel-category-dialog").focus();
+}
+
+function closeCategoryManagement() {
+    if (!categoryRequestPending) categoryDialog.close();
+}
+
+function openCategoryEditor(categoryId = null) {
     if (!categoriesLoaded || categoryRequestPending) return;
     const category = categoryId ? findCategory(categoryId) : null;
     if (categoryId && !category) {
         setCategoryFeedback("This category is no longer available. Reload Settings and try again.", true);
+        renderCategoryOptions();
         return;
     }
     editingCategoryId = category ? category.id : null;
-    categoryReturnFocus = trigger || addCategoryButton;
-    document.getElementById("category-dialog-title").textContent = category ? "Edit Category" : "Add Category";
+    document.getElementById("category-editor-title").textContent = category ? "Edit Category" : "Add Category";
     saveCategoryButton.textContent = category ? "Save Category" : "Add Category";
     categoryNameInput.value = category ? category.name : "";
     categoryNameError.textContent = "";
     categoryNameInput.removeAttribute("aria-invalid");
-    categoryDialog.showModal();
+    categoryEditorDialog.showModal();
     categoryNameInput.focus();
+}
+
+function closeCategoryEditor() {
+    if (!categoryRequestPending) categoryEditorDialog.close();
 }
 
 categoryForm.addEventListener("submit", async function (event) {
@@ -293,6 +287,8 @@ categoryForm.addEventListener("submit", async function (event) {
         return;
     }
 
+    const wasEditing = Boolean(editingCategoryId);
+    let saveSucceeded = false;
     await categoryRequest.run(async function () {
         try {
             const saved = await Sari2Api.request(
@@ -307,10 +303,9 @@ categoryForm.addEventListener("submit", async function (event) {
                 categories.push(saved);
             }
             sortCategories();
-            categoryReturnFocus = addCategoryButton;
-            categoryDialog.close();
-            setCategoryFeedback(editingCategoryId ? "Category updated." : "Category added.", false);
-            editingCategoryId = null;
+            renderCategoryOptions(saved.id);
+            setCategoryFeedback(wasEditing ? "Category updated." : "Category added.", false);
+            saveSucceeded = true;
         } catch (error) {
             const serverMessage = error && error.details && typeof error.details.name === "string"
                 ? error.details.name
@@ -319,36 +314,51 @@ categoryForm.addEventListener("submit", async function (event) {
             categoryNameInput.setAttribute("aria-invalid", "true");
         }
     });
+    if (saveSucceeded) {
+        categoryEditorDialog.close();
+        editingCategoryId = null;
+    }
 });
 
-async function deleteCategory(category, trigger) {
+async function deleteCategory(category) {
     if (!category || categoryRequestPending ||
         !window.confirm('Delete category "' + category.name + '"?')) return;
+    let deleteSucceeded = false;
     await categoryRequest.run(async function () {
         try {
             await Sari2Api.request("/categories/" + encodeURIComponent(category.id), { method: "DELETE" });
             categories = categories.filter(function (item) { return item.id !== category.id; });
+            renderCategoryOptions();
             setCategoryFeedback("Category deleted.", false);
-            addCategoryButton.focus();
+            deleteSucceeded = true;
         } catch (error) {
             setCategoryFeedback(error && error.message ? error.message : "Unable to delete the category. Try again.", true);
-            if (trigger && trigger.isConnected) trigger.focus();
         }
     });
+    if (deleteSucceeded) addCategoryButton.focus();
+    else deleteCategoryButton.focus();
 }
 
+manageCategoriesButton.addEventListener("click", openCategoryManagement);
 addCategoryButton.addEventListener("click", function () {
-    openCategoryDialog(null, addCategoryButton);
+    openCategoryEditor();
 });
-categoryList.addEventListener("click", function (event) {
-    const button = event.target.closest("button[data-action]");
-    if (!button) return;
-    const category = findCategory(button.dataset.categoryId);
-    if (button.dataset.action === "edit") openCategoryDialog(button.dataset.categoryId, button);
-    else if (button.dataset.action === "delete") deleteCategory(category, button);
+categorySelect.addEventListener("change", function () {
+    renderCategoryOptions(categorySelect.value);
+    setCategoryFeedback("", false);
 });
+editCategoryButton.addEventListener("click", function () {
+    const category = findCategory(categorySelect.value);
+    if (category) openCategoryEditor(category.id);
+});
+deleteCategoryButton.addEventListener("click", function () {
+    deleteCategory(findCategory(categorySelect.value));
+});
+document.getElementById("close-category-dialog").addEventListener("click", closeCategoryManagement);
+document.getElementById("cancel-category-dialog").addEventListener("click", closeCategoryManagement);
+document.getElementById("close-category-editor").addEventListener("click", closeCategoryEditor);
 document.getElementById("cancel-category").addEventListener("click", function () {
-    categoryDialog.close();
+    closeCategoryEditor();
 });
 categoryNameInput.addEventListener("input", function () {
     categoryNameError.textContent = "";
@@ -358,9 +368,17 @@ categoryDialog.addEventListener("cancel", function (event) {
     if (categoryRequestPending) event.preventDefault();
 });
 categoryDialog.addEventListener("close", function () {
-    if (categoryReturnFocus && categoryReturnFocus.isConnected) categoryReturnFocus.focus();
-    else addCategoryButton.focus();
-    categoryReturnFocus = null;
+    manageCategoriesButton.focus();
+});
+categoryEditorDialog.addEventListener("cancel", function (event) {
+    if (categoryRequestPending) event.preventDefault();
+});
+categoryEditorDialog.addEventListener("close", function () {
+    editingCategoryId = null;
+    if (categoryDialog.open) {
+        if (findCategory(categorySelect.value)) editCategoryButton.focus();
+        else addCategoryButton.focus();
+    }
 });
 
 loadSettingsForm();

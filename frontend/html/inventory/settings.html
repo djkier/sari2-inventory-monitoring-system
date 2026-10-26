@@ -74,29 +74,15 @@
                             <p id="settings-warning-error" class="field-error"></p>
                         </div>
                     </fieldset>
+                    <fieldset class="card">
+                        <legend>Category Management</legend>
+                        <p class="settings-help">Manage the categories used to organize your store's products.</p>
+                        <button id="manage-categories" class="btn-secondary" type="button">Manage Categories</button>
+                    </fieldset>
                     <button class="btn-primary" type="submit">Save Settings</button>
                     <p id="settings-error" class="field-error" role="alert"></p>
                     <p id="settings-feedback" role="status" aria-live="polite"></p>
                 </form>
-                <section id="category-settings" class="card category-settings" aria-labelledby="category-settings-title">
-                    <div class="category-settings-header">
-                        <h2 id="category-settings-title">Category Management</h2>
-                        <button id="add-category" class="btn-primary" type="button">Add Category</button>
-                    </div>
-                    <p class="category-settings-description">Add, edit, or delete categories used to organize your store's products.</p>
-                    <p id="category-feedback" role="status" aria-live="polite"></p>
-                    <div class="table-scroll" tabindex="0" role="region" aria-label="Store categories">
-                        <table class="category-settings-table">
-                            <thead>
-                                <tr>
-                                    <th scope="col">Category Name</th>
-                                    <th scope="col">Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody id="category-list"></tbody>
-                        </table>
-                    </div>
-                </section>
                 <dialog id="settings-success-dialog" class="settings-dialog" aria-labelledby="settings-success-title" aria-describedby="settings-success-message">
                     <h2 id="settings-success-title">Settings saved</h2>
                     <p id="settings-success-message">Your settings have been saved successfully.</p>
@@ -104,15 +90,36 @@
                         <button class="btn-primary" type="submit" autofocus>Done</button>
                     </form>
                 </dialog>
-                <dialog id="category-dialog" class="category-dialog" aria-labelledby="category-dialog-title">
-                    <h2 id="category-dialog-title">Add Category</h2>
+                <dialog id="category-dialog" class="category-dialog" aria-labelledby="category-dialog-title" aria-describedby="category-dialog-description">
+                    <div class="category-dialog-header">
+                        <h2 id="category-dialog-title">Manage Categories</h2>
+                        <button id="close-category-dialog" class="category-dialog-close" type="button" aria-label="Close category management dialog">&times;</button>
+                    </div>
+                    <p id="category-dialog-description" class="category-dialog-description">Select a category to edit or delete, or add a new category for your store.</p>
+                    <div class="form-group">
+                        <label for="category-select">Category</label>
+                        <select id="category-select"></select>
+                    </div>
+                    <button id="add-category" class="category-add-action" type="button">+ Add New Category</button>
+                    <p id="category-feedback" role="status" aria-live="polite"></p>
+                    <div class="category-dialog-actions">
+                        <button id="cancel-category-dialog" class="btn-secondary" type="button">Cancel</button>
+                        <button id="delete-category" class="btn-danger" type="button" disabled>Delete</button>
+                        <button id="edit-category" class="btn-primary" type="button" disabled>Edit</button>
+                    </div>
+                </dialog>
+                <dialog id="category-editor-dialog" class="category-dialog" aria-labelledby="category-editor-title">
+                    <div class="category-dialog-header">
+                        <h2 id="category-editor-title">Add Category</h2>
+                        <button id="close-category-editor" class="category-dialog-close" type="button" aria-label="Close category editor">&times;</button>
+                    </div>
                     <form id="category-form" novalidate>
                         <div class="form-group">
                             <label for="category-name">Category Name</label>
                             <input id="category-name" name="name" type="text" required aria-describedby="category-name-error">
                             <p id="category-name-error" class="field-error" role="alert"></p>
                         </div>
-                        <div class="category-settings-actions">
+                        <div class="category-dialog-actions">
                             <button id="cancel-category" class="btn-secondary" type="button">Cancel</button>
                             <button id="save-category" class="btn-primary" type="submit">Add Category</button>
                         </div>
