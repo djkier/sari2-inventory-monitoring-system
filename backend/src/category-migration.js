@@ -70,7 +70,9 @@ function planCategoryMigration(categories, products, validStoreIds) {
             }
         }
 
-        
+        if (product.categoryId === category.id && product.category === category.name) return product;
+        changed = true;
+        return { ...product, categoryId: category.id, category: category.name };
     });
 
     return {
