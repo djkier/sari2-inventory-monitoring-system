@@ -1,7 +1,7 @@
-// Public demo account names remain a convenience; credential validation is server-side.
+// Public demo credentials remain a convenience; credential validation is server-side.
 const testAccounts = [
-    { username: "owner", role: "Store Owner" },
-    { username: "staff", role: "Store Staff" }
+    { username: "owner", password: "owner123", role: "Store Owner" },
+    { username: "staff", password: "staff123", role: "Store Staff" }
 ];
 
 // Resolve from this script so redirects work from either HTML subfolder.
@@ -72,7 +72,7 @@ if (loginForm) {
         const account = testAccounts.find(function (user) { return user.username === accountSelect.value; });
         if (!account) return;
         usernameInput.value = account.username;
-        passwordInput.value = "";
+        passwordInput.value = account.password;
         passwordInput.focus();
         feedback.textContent = "";
         inputs.forEach(function (input) {
@@ -129,6 +129,7 @@ if (loginForm) {
 
     inputs.forEach(function (input) {
         input.addEventListener("input", function () {
+            accountSelect.value = "";
             feedback.textContent = "";
             if (input.hasAttribute("aria-invalid")) {
                 validateLoginField(input);
@@ -144,6 +145,8 @@ if (signupForm) {
     const signupFields = document.getElementById("signup-fields");
     const submitButton = document.getElementById("signup-submit");
     const feedback = document.getElementById("signup-feedback");
+    const successDialog = document.getElementById("signup-success-dialog");
+    const successStoreCode = document.getElementById("signup-success-store-code");
     const fields = Array.from(signupForm.querySelectorAll("input, select"));
     const nameInput = document.getElementById("signup-name");
     const usernameInput = document.getElementById("signup-username");
@@ -191,8 +194,18 @@ if (signupForm) {
         }
 
         let message = "";
-        if (!field.value.trim()) {
+        const preservesWhitespace = field === usernameInput || field === password || field === confirmation;
+        if (preservesWhitespace ? !field.value : !field.value.trim()) {
             message = "Please complete this field.";
+        } else if (field === usernameInput && !/^[A-Za-z0-9_]{3,}$/.test(field.value)) {
+            message = "Username must be at least 3 characters and contain only letters, numbers, and underscores.";
+        } else if (field === password && field.value.length < 6) {
+            message = "Password must be at least 6 characters.";
+        } else if (field === password && /\s/.test(field.value)) {
+            message = "Password must not contain spaces.";
+        } else if (field === password &&
+            (!/[A-Za-z]/.test(field.value) || !/[0-9]/.test(field.value))) {
+            message = "Password must contain at least one letter and one number.";
         } else if (field.id === "signup-role" &&
             !allowedRoles.includes(field.value)) {
             message = "Please select Store Owner or Store Staff.";
@@ -260,12 +273,11 @@ if (signupForm) {
             signupForm.reset();
             fields.forEach(function (field) { setFieldMessage(field, ""); });
             updateRoleFields();
-            setFeedback(
-                storeCode
-                    ? "Account created. Your store code is " + storeCode + ". Save it and share it with your Staff. You can now return to Login."
-                    : "Account created. You can now return to Login.",
-                "success"
-            );
+            successStoreCode.textContent = storeCode
+                ? "Your store code is " + storeCode + ". Save it and share it with your Staff."
+                : "";
+            successStoreCode.hidden = !storeCode;
+            successDialog.showModal();
         } catch (error) {
             const firstServerField = applyServerFieldErrors(error.details);
             setFeedback(error.message || "Unable to create the account. Try again.", "error");
@@ -283,6 +295,9 @@ if (signupForm) {
                 validateSignupField(confirmation);
             }
         });
+    });
+    successDialog.addEventListener("close", function () {
+        submitButton.focus();
     });
     roleInput.addEventListener("change", updateRoleFields);
     signupFields.disabled = false;

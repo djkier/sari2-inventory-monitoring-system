@@ -9,7 +9,7 @@ function normalizeText(value) {
 }
 
 function normalizeUsername(value) {
-    return normalizeText(value).toLowerCase();
+    return typeof value === "string" ? value : "";
 }
 
 function normalizeStoreName(value) {
@@ -33,8 +33,20 @@ function validateRegistration(input) {
     const errors = {};
 
     if (!values.name) errors.name = "Full name is required.";
-    if (!values.username) errors.username = "Username is required.";
-    if (!values.password) errors.password = "Password is required.";
+    if (!values.username) {
+        errors.username = "Username is required.";
+    } else if (!/^[A-Za-z0-9_]{3,}$/.test(values.username)) {
+        errors.username = "Username must be at least 3 characters and contain only letters, numbers, and underscores.";
+    }
+    if (!values.password) {
+        errors.password = "Password is required.";
+    } else if (values.password.length < 6) {
+        errors.password = "Password must be at least 6 characters.";
+    } else if (/\s/.test(values.password)) {
+        errors.password = "Password must not contain spaces.";
+    } else if (!/[A-Za-z]/.test(values.password) || !/[0-9]/.test(values.password)) {
+        errors.password = "Password must contain at least one letter and one number.";
+    }
     if (!values.confirmation) errors.confirmation = "Password confirmation is required.";
     else if (values.password !== values.confirmation) errors.confirmation = "Passwords must match.";
     if (!roles.includes(values.role)) errors.role = "Role must be Store Owner or Store Staff.";
@@ -71,7 +83,7 @@ function safeUser(user) {
 
 function usernameExists(users, username) {
     return users.some(function (user) {
-        return user && normalizeUsername(user.username) === username;
+        return user && user.username === username;
     });
 }
 
