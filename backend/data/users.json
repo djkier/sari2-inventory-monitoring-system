@@ -1,7 +1,7 @@
 [
   {
     "id": "00000000-0000-4000-8000-000000000101",
-    "name": "Juan Dela Cruz",
+    "name": "Juan Dela Cruzs",
     "username": "owner",
     "password": "owner123",
     "role": "Store Owner",
@@ -14,5 +14,21 @@
     "password": "staff123",
     "role": "Store Staff",
     "storeId": "00000000-0000-4000-8000-000000000001"
+  },
+  {
+    "id": "2b6e09af-83c4-4d3d-a96f-2e907106c2b1",
+    "name": "asd asd asd",
+    "username": "asd",
+    "password": "abc123",
+    "role": "Store Owner",
+    "storeId": "c6ae94f1-32e7-4791-b875-c0f71caae2cf"
+  },
+  {
+    "id": "0a12e372-311c-4ee6-9b24-bbbfeadb458d",
+    "name": "asd",
+    "username": "werq",
+    "password": "qaqaqa1",
+    "role": "Store Staff",
+    "storeId": "c6ae94f1-32e7-4791-b875-c0f71caae2cf"
   }
 ]

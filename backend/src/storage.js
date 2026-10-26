@@ -18,7 +18,6 @@ const dataFiles = Object.freeze({
         fileName: "settings.json",
         initialValue: {
             storeName: "My Store",
-            ownerName: "",
             defaultLowStockThreshold: 5,
             expirationWarningDays: 7
         },

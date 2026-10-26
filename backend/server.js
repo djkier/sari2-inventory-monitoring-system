@@ -40,7 +40,8 @@ const {
     destroySession,
     ensureDemoAuthData,
     requireAuthentication,
-    updateSessionStoreIdentity
+    updateSessionStoreIdentity,
+    updateSessionUserIdentity
 } = require("./src/authentication");
 
 const app = express();
@@ -108,13 +109,14 @@ app.get("/api/monitoring", async function (request, response) {
 });
 
 app.get("/api/settings", async function (request, response) {
-    const settings = await getSettings(request.auth.store.id, request.auth.user.role);
+    const settings = await getSettings(request.auth.store.id, request.auth.user);
     response.json({ success: true, data: settings });
 });
 
 app.put("/api/settings", async function (request, response) {
-    const result = await updateSettings(request.body, request.auth.store.id, request.auth.user.role);
-    updateSessionStoreIdentity(result.store);
+    const result = await updateSettings(request.body, request.auth.store.id, request.auth.user);
+    if (result.store) updateSessionStoreIdentity(result.store);
+    updateSessionUserIdentity(result.user);
     response.json({ success: true, data: result.settings });
 });
 
