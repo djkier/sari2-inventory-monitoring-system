@@ -1,7 +1,7 @@
-// Public demo account names remain a convenience; credential validation is server-side.
+// Public demo credentials remain a convenience; credential validation is server-side.
 const testAccounts = [
-    { username: "owner", role: "Store Owner" },
-    { username: "staff", role: "Store Staff" }
+    { username: "owner", password: "owner123", role: "Store Owner" },
+    { username: "staff", password: "staff123", role: "Store Staff" }
 ];
 
 // Resolve from this script so redirects work from either HTML subfolder.
@@ -72,7 +72,7 @@ if (loginForm) {
         const account = testAccounts.find(function (user) { return user.username === accountSelect.value; });
         if (!account) return;
         usernameInput.value = account.username;
-        passwordInput.value = "";
+        passwordInput.value = account.password;
         passwordInput.focus();
         feedback.textContent = "";
         inputs.forEach(function (input) {
@@ -129,6 +129,7 @@ if (loginForm) {
 
     inputs.forEach(function (input) {
         input.addEventListener("input", function () {
+            accountSelect.value = "";
             feedback.textContent = "";
             if (input.hasAttribute("aria-invalid")) {
                 validateLoginField(input);
