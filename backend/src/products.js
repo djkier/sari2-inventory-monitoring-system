@@ -182,3 +182,92 @@ async function getProduct(id, storeId) {
     if (!product) throw notFound(id);
     return hydrateProduct(product, catalogProducts);
 }
+async function createProduct(input, storeId) {
+    const values = validateProductInput(input, { requireQuantity: true });
+    const productId = crypto.randomUUID();
+    return mutateJsonStores(["products", "catalogProducts"], async function (data) {
+        const resolvedValues = resolveProductCategory(values, await readJson("categories"), storeId);
+        let catalogProduct;
+        let catalogProducts = data.catalogProducts;
+        if (resolvedValues.catalogProductId) {
+            catalogProduct = requireCatalogProduct(catalogProducts, resolvedValues.catalogProductId);
+        } else {
+            catalogProduct = {
+                id: crypto.randomUUID(),
+                name: resolvedValues.name,
+                imageUrl: resolvedValues.imageUrl || "",
+                sourceProductId: productId
+            };
+            catalogProducts = catalogProducts.concat(catalogProduct);
+        }
+        const product = {
+            id: productId,
+            storeId: storeId,
+            ...resolvedValues,
+            catalogProductId: catalogProduct.id,
+            name: catalogProduct.name,
+            imageUrl: catalogProduct.imageUrl
+        };
+        return {
+            values: {
+                products: data.products.concat(product),
+                catalogProducts: catalogProducts
+            },
+            result: product
+        };
+    });
+}
+
+async function updateProduct(id, input, storeId) {
+    const values = validateProductInput(input);
+    return mutateJsonStores(["products", "catalogProducts"], async function (data) {
+        const index = findProductIndex(data.products, id, storeId);
+        if (index === -1) throw notFound(id);
+        const resolvedValues = resolveProductCategory(values, await readJson("categories"), storeId);
+        const currentProduct = data.products[index];
+        const targetCatalogId = resolvedValues.catalogProductId || currentProduct.catalogProductId;
+        let catalogProducts = data.catalogProducts.slice();
+        let catalogProduct = requireCatalogProduct(catalogProducts, targetCatalogId);
+
+        if (targetCatalogId === currentProduct.catalogProductId && catalogProduct.imageFileName &&
+            resolvedValues.imageUrl !== undefined && resolvedValues.imageUrl !== catalogProduct.imageUrl) {
+            throw new AppError(
+                409,
+                "MANAGED_IMAGE_REQUIRES_UPLOAD",
+                "Replace this catalog image using the image upload control.",
+                { imageUrl: "Managed catalog images must be replaced through the image upload endpoint." }
+            );
+        }
+
+        if (targetCatalogId === currentProduct.catalogProductId &&
+            (resolvedValues.name !== undefined || resolvedValues.imageUrl !== undefined)) {
+            catalogProduct = {
+                ...catalogProduct,
+                ...(resolvedValues.name === undefined ? {} : { name: resolvedValues.name }),
+                ...(resolvedValues.imageUrl === undefined ? {} : { imageUrl: resolvedValues.imageUrl })
+            };
+            const catalogIndex = catalogProducts.findIndex(function (item) { return item.id === catalogProduct.id; });
+            catalogProducts[catalogIndex] = catalogProduct;
+        }
+
+        const updatedProducts = data.products.map(function (product) {
+            return product && product.catalogProductId === catalogProduct.id
+                ? { ...product, name: catalogProduct.name, imageUrl: catalogProduct.imageUrl }
+                : product;
+        });
+        const updatedProduct = {
+            ...updatedProducts[index],
+            ...Object.fromEntries(editableFields.map(function (field) {
+                return [field, resolvedValues[field]];
+            })),
+            catalogProductId: catalogProduct.id,
+            name: catalogProduct.name,
+            imageUrl: catalogProduct.imageUrl
+        };
+        updatedProducts[index] = updatedProduct;
+        return {
+            values: { products: updatedProducts, catalogProducts: catalogProducts },
+            result: updatedProduct
+        };
+    });
+}
