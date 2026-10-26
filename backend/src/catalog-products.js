@@ -38,3 +38,42 @@ function publicCatalogProduct(catalogProduct) {
     return publicFields;
 }
 
+function hydrateProduct(product, catalogProducts) {
+    const catalogProduct = findCatalogProduct(catalogProducts, product && product.catalogProductId);
+    if (!catalogProduct || !validateCatalogProduct(catalogProduct)) {
+        throw catalogReferenceError(product && product.catalogProductId);
+    }
+    return {
+        ...product,
+        name: catalogProduct.name,
+        imageUrl: catalogProduct.imageUrl
+    };
+}
+
+async function listCatalogProducts() {
+    const catalogProducts = await readJson("catalogProducts");
+    if (catalogProducts.some(function (record) { return !validateCatalogProduct(record); })) {
+        throw catalogReferenceError();
+    }
+    return catalogProducts.slice().sort(function (left, right) {
+        return left.name.localeCompare(right.name, "en", { sensitivity: "base" });
+    }).map(publicCatalogProduct);
+}
+
+async function getCatalogProduct(id) {
+    const catalogProducts = await readJson("catalogProducts");
+    const catalogProduct = findCatalogProduct(catalogProducts, id);
+    if (!catalogProduct || !validateCatalogProduct(catalogProduct)) {
+        throw new AppError(404, "CATALOG_PRODUCT_NOT_FOUND", "Catalog product not found.", { id: id });
+    }
+    return publicCatalogProduct(catalogProduct);
+}
+
+module.exports = {
+    findCatalogProduct,
+    getCatalogProduct,
+    hydrateProduct,
+    listCatalogProducts,
+    publicCatalogProduct,
+    validateCatalogProduct
+};
