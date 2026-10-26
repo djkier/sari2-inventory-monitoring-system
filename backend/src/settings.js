@@ -65,3 +65,75 @@ function createSettingsRecord(store, values = defaultSettings) {
         expirationWarningDays: values.expirationWarningDays
     };
 }
+
+function safeSettings(record, store, role) {
+    return {
+        ...record,
+        ...(role === "Store Owner" ? { storeCode: store.code } : {})
+    };
+}
+
+function validateStoredRecord(record, store) {
+    if (!record || typeof record !== "object" || Array.isArray(record)) {
+        throw new AppError(500, "INVALID_SETTINGS_DATA", "Stored settings are invalid.");
+    }
+    if (record.storeId !== undefined && record.storeId !== store.id) {
+        throw new AppError(500, "INVALID_SETTINGS_DATA", "Stored settings do not match their store.");
+    }
+
+    let values;
+    try {
+        values = validateSettings({
+            storeName: store.name,
+            ownerName: record.ownerName,
+            defaultLowStockThreshold: record.defaultLowStockThreshold,
+            expirationWarningDays: record.expirationWarningDays
+        }, { rejectScope: false });
+    } catch (error) {
+        throw new AppError(500, "INVALID_SETTINGS_DATA", "Stored settings are invalid.");
+    }
+    return createSettingsRecord(store, values);
+}
+
+function isLegacySettings(value) {
+    return ["storeName", "ownerName", "defaultLowStockThreshold", "expirationWarningDays"].some(function (field) {
+        return Object.prototype.hasOwnProperty.call(value, field);
+    });
+}
+
+async function migrateLegacySettings(demoStoreId) {
+    return mutateJsonStores(["stores", "settings"], function (data) {
+        const storesById = new Map(data.stores.filter(Boolean).map(function (store) {
+            return [store.id, store];
+        }));
+        const demoStore = storesById.get(demoStoreId);
+        if (!demoStore) {
+            throw new AppError(500, "DEMO_STORE_UNAVAILABLE", "The demo store is unavailable for settings migration.");
+        }
+
+        const migrated = {};
+        if (isLegacySettings(data.settings)) {
+            const legacyValues = validateSettings({
+                storeName: demoStore.name,
+                ownerName: data.settings.ownerName,
+                defaultLowStockThreshold: data.settings.defaultLowStockThreshold,
+                expirationWarningDays: data.settings.expirationWarningDays
+            }, { rejectScope: false });
+            migrated[demoStore.id] = createSettingsRecord(demoStore, legacyValues);
+        } else {
+            for (const [storeId, record] of Object.entries(data.settings)) {
+                const store = storesById.get(storeId);
+                if (!store) {
+                    throw new AppError(500, "INVALID_SETTINGS_DATA", "Stored settings reference an unknown store.");
+                }
+                migrated[storeId] = validateStoredRecord(record, store);
+            }
+        }
+
+        return {
+            values: { stores: data.stores, settings: migrated },
+            result: migrated
+        };
+    });
+}
+
