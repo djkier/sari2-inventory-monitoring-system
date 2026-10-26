@@ -113,3 +113,72 @@ function validateProductInput(input, options = {}) {
 
     return values;
 }
+
+function normalizeCategoryName(value) {
+    return value.trim().replace(/\s+/g, " ").toLocaleLowerCase("en");
+}
+
+function resolveProductCategory(values, categories, storeId) {
+    let category;
+    if (values.categoryId) {
+        category = categories.find(function (item) {
+            return item && item.id === values.categoryId && item.storeId === storeId;
+        });
+    } else {
+        const normalizedName = normalizeCategoryName(values.category);
+        category = categories.find(function (item) {
+            return item && item.storeId === storeId &&
+                normalizeCategoryName(item.name) === normalizedName;
+        });
+    }
+    if (!category) {
+        throw new AppError(400, "CATEGORY_NOT_FOUND", "Select a category that belongs to this store.", {
+            categoryId: "Category not found for the authenticated store."
+        });
+    }
+    return { ...values, categoryId: category.id, category: category.name };
+}
+
+function catalogNotFound(id) {
+    return new AppError(400, "CATALOG_PRODUCT_NOT_FOUND", "Select a valid shared catalog product.", {
+        catalogProductId: "Catalog product not found."
+    });
+}
+
+function requireCatalogProduct(catalogProducts, id) {
+    const catalogProduct = findCatalogProduct(catalogProducts, id);
+    if (!catalogProduct) throw catalogNotFound(id);
+    return catalogProduct;
+}
+
+function findProductIndex(products, id, storeId) {
+    return products.findIndex(function (product) {
+        return product && product.id === id && product.storeId === storeId;
+    });
+}
+
+function notFound(id) {
+    return new AppError(404, "PRODUCT_NOT_FOUND", "Product not found.", { id: id });
+}
+
+async function listProducts(storeId) {
+    const [products, catalogProducts] = await Promise.all([
+        readJson("products"),
+        readJson("catalogProducts")
+    ]);
+    return products.filter(function (product) {
+        return product && product.storeId === storeId;
+    }).map(function (product) { return hydrateProduct(product, catalogProducts); });
+}
+
+async function getProduct(id, storeId) {
+    const [products, catalogProducts] = await Promise.all([
+        readJson("products"),
+        readJson("catalogProducts")
+    ]);
+    const product = products.find(function (item) {
+        return item && item.id === id && item.storeId === storeId;
+    });
+    if (!product) throw notFound(id);
+    return hydrateProduct(product, catalogProducts);
+}
