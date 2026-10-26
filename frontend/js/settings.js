@@ -60,9 +60,9 @@ const settingsSaveRequest = Sari2Api.createRequestGuard(function (isPending) {
     setSettingsPending(isPending, "Saving...");
 });
 
-settingsForm.addEventListener("submit", function (event) {
+settingsForm.addEventListener("submit", async function (event) {
     event.preventDefault();
-    if (!initializeApp()) return;
+    if (settingsSaveRequest.isPending || !settingsContext) return;
     const settings = {};
     let firstInvalid = null;
     document.getElementById("settings-error").textContent = "";
@@ -80,26 +80,28 @@ settingsForm.addEventListener("submit", function (event) {
             if (field.required && !value) error = "Enter a store name.";
             settings[field.name] = value;
         }
-        field.setAttribute("aria-invalid", error ? "true" : "false");
-        document.getElementById(field.id + "-error").textContent = error;
+        setFieldError(field, error);
         if (error && !firstInvalid) firstInvalid = field;
     });
     if (firstInvalid) { firstInvalid.focus(); return; }
-    if (!saveSettings(settings)) {
-        document.getElementById("settings-error").textContent = "Unable to save settings. Check browser storage and try again.";
-        return;
+
+    try {
+        const savedSettings = await settingsSaveRequest.run(function () {
+            return Sari2Api.request("/settings", { method: "PUT", body: settings });
+        });
+        renderSettingsForm(savedSettings);
+        settingsContext = { identity: settingsContext.identity, settings: savedSettings };
+        applyConfirmedAppSettings(settingsContext.identity, savedSettings);
+        document.getElementById("settings-success-dialog").showModal();
+    } catch (error) {
+        const firstServerField = applyServerFieldErrors(error.details);
+        document.getElementById("settings-error").textContent =
+            error.message || "Unable to save settings. Check the server and try again.";
+        if (firstServerField) firstServerField.focus();
     }
-    loadSettingsForm();
-    document.getElementById("settings-success-dialog").showModal();
 });
 
 loadSettingsForm();
-window.addEventListener("pageshow", loadSettingsForm);
-window.addEventListener("storage", function (event) {
-    if (event.key === "sari2_settings" || event.key === null) {
-        // Preserve unsaved input; make the external change visible instead of replacing it.
-        if (!initializeApp()) return;
-        document.getElementById("store-name").textContent = getSettings().storeName;
-        document.getElementById("settings-feedback").textContent = "Settings changed in another page. Reload to view them, or save to use the values in this form.";
-    }
+window.addEventListener("pageshow", function (event) {
+    if (event.persisted) loadSettingsForm(true);
 });
