@@ -33,3 +33,12 @@ function validateTransaction(input) {
         quantity: input.quantity
     };
 }
+
+async function listStockMovements(storeId) {
+    const movements = await readJson("stockMovements");
+    return movements
+        .filter(function (movement) { return movement && movement.storeId === storeId; })
+        .sort(function (first, second) {
+            return new Date(second.date).getTime() - new Date(first.date).getTime();
+        });
+}
