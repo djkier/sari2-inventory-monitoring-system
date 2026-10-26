@@ -24,7 +24,7 @@ async function loadExpiration(forceRefresh = false) {
     expirationLoadError = "";
     return expirationLoadRequest.run(async function () {
         try {
-            const context = forceRefresh ? await initializeApp(true) : await appReady;
+            const context = initializeApp();
             if (!context) {
                 throw new Sari2Api.ApiError("AUTHENTICATION_REQUIRED", "Unable to load expiration monitoring.");
             }

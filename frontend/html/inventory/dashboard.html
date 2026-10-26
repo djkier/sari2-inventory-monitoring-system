@@ -7,6 +7,7 @@
     <link rel="stylesheet" href="../../css/style.css">
     <link rel="stylesheet" href="../../css/app.css">
     <script src="../../js/api.js" defer></script>
+    <script src="../../js/storage.js" defer></script>
     <script src="../../js/auth.js" defer></script>
     <script src="../../js/inventory.js" defer></script>
     <script src="../../js/app.js" defer></script>
@@ -37,7 +38,10 @@
 
         <div class="app-workspace">
             <header class="app-header">
-                <p id="store-name"></p>
+                <div class="app-store-identity" aria-label="Store identity">
+                    <p><strong>Store Name:</strong> <span id="store-name"></span></p>
+                    <p><strong>Store Identity:</strong> <span id="store-identity"></span></p>
+                </div>
                 <div class="app-user" aria-label="Logged-in user">
                     <strong id="current-user-name"></strong>
                     <span id="current-user-role"></span>

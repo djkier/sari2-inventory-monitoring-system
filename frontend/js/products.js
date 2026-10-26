@@ -10,6 +10,7 @@ const categoryError = document.getElementById("category-name-error");
 const addProductButton = document.getElementById("add-product");
 const priceFormatter = new Intl.NumberFormat("en-PH", { style: "currency", currency: "PHP" });
 let products = [];
+let categories = [];
 let productSettings;
 let editingIndex = null;
 let editorSnapshot = "";
@@ -25,15 +26,10 @@ function normalizeCategory(value) {
     return typeof value === "string" ? value.trim().replace(/\s+/g, " ") : "";
 }
 
-function getProductCategories(items) {
-    const categories = [];
-    items.forEach(function (product) {
-        const category = normalizeCategory(product.category);
-        if (category && !categories.some(function (existing) { return existing.toLowerCase() === category.toLowerCase(); })) {
-            categories.push(category);
-        }
-    });
-    return categories.sort(function (a, b) { return a.localeCompare(b); });
+function getProductCategories() {
+    return categories.map(function (category) { return category.name; })
+        .concat(pendingCategories)
+        .sort(function (left, right) { return left.localeCompare(right, "en", { sensitivity: "base" }); });
 }
 
 function openCategoryDialog() {
@@ -53,8 +49,8 @@ function cancelCategoryDialog() {
 function populateCategoryOptions(selectedCategory = "") {
     const select = productInput("category");
     select.replaceChildren();
-    const categories = getProductCategories(products.concat(pendingCategories.map(function (category) { return { category: category }; })));
-    [["", "Select Category"]].concat(categories.map(function (category) {
+    const categoryNames = getProductCategories();
+    [["", "Select Category"]].concat(categoryNames.map(function (category) {
         return ["category:" + category, category];
     }), [["new", "+ Add New Category"]]).forEach(function (entry) {
         const option = document.createElement("option");
@@ -62,7 +58,7 @@ function populateCategoryOptions(selectedCategory = "") {
         option.textContent = entry[1];
         select.appendChild(option);
     });
-    const existing = categories.find(function (category) {
+    const existing = categoryNames.find(function (category) {
         return category.toLowerCase() === normalizeCategory(selectedCategory).toLowerCase();
     });
     select.value = existing ? "category:" + existing : "";
@@ -71,8 +67,7 @@ function populateCategoryOptions(selectedCategory = "") {
 categoryForm.addEventListener("submit", function (event) {
     event.preventDefault();
     const category = normalizeCategory(categoryName.value);
-    const categories = getProductCategories(getProducts()).concat(pendingCategories);
-    const duplicate = categories.some(function (existing) { return existing.toLowerCase() === category.toLowerCase(); });
+    const duplicate = getProductCategories().some(function (existing) { return existing.toLowerCase() === category.toLowerCase(); });
     categoryError.textContent = !category ? "Enter a category name." :
         duplicate ? "This category already exists. Select it from the Category dropdown." : "";
     categoryName.setAttribute("aria-invalid", categoryError.textContent ? "true" : "false");
@@ -118,20 +113,43 @@ function validateProductValues(values, isEditing) {
     return errors;
 }
 
-function refreshProducts() {
+async function refreshProducts() {
     if (!initializeApp()) return;
-    storageWarnings.length = 0;
-    products = getProducts();
-    productSettings = getSettings();
-    document.getElementById("store-name").textContent = productSettings.storeName;
-    document.getElementById("products-warning").textContent = storageWarnings.join(" ");
+    const warning = document.getElementById("products-warning");
+    warning.textContent = "Loading products...";
+
+    try {
+        const results = await Promise.all([
+            Sari2Api.request("monitoring"),
+            Sari2Api.request("categories")
+        ]);
+        const monitoring = results[0];
+        if (!monitoring || !Array.isArray(monitoring.products) ||
+            !Number.isSafeInteger(monitoring.defaultLowStockThreshold) ||
+            !Number.isSafeInteger(monitoring.expirationWarningDays) || !Array.isArray(results[1])) {
+            throw new Sari2Api.ApiError("INVALID_RESPONSE", "The server returned invalid inventory data.");
+        }
+        products = monitoring.products;
+        categories = results[1];
+        productSettings = {
+            defaultLowStockThreshold: monitoring.defaultLowStockThreshold,
+            expirationWarningDays: monitoring.expirationWarningDays
+        };
+        warning.textContent = "";
+    } catch (error) {
+        products = [];
+        categories = [];
+        productSettings = { defaultLowStockThreshold: 0, expirationWarningDays: 0 };
+        warning.textContent = error.message || "Unable to load products. Check the server and try again.";
+    }
+
     renderProducts();
 }
 
-function matchesProductFilters(product, search, stock, expiration, today) {
+function matchesProductFilters(product, search, stock, expiration) {
     return product.name.toLowerCase().includes(search.toLowerCase().trim()) &&
-        (!stock || getStockStatus(product, productSettings) === stock) &&
-        (!expiration || getExpirationStatus(product, productSettings.expirationWarningDays, today) === expiration);
+        (!stock || product.stockStatus === stock) &&
+        (!expiration || product.expirationStatus === expiration);
 }
 
 function createProductImage(product) {
@@ -162,13 +180,12 @@ function renderProducts() {
     const search = document.getElementById("product-search").value;
     const stock = document.getElementById("stock-filter").value;
     const expiration = document.getElementById("expiration-filter").value;
-    const today = new Date();
     // Sort the view while keeping original indexes for Edit and Delete.
     const displayedProducts = products.map(function (product, index) { return { product: product, index: index }; });
     displayedProducts.sort(function (a, b) { return a.product.name.localeCompare(b.product.name, "en", { sensitivity: "base" }); });
     const matchingProducts = displayedProducts.filter(function (entry) {
         const product = entry.product;
-        return matchesProductFilters(product, search, stock, expiration, today);
+        return matchesProductFilters(product, search, stock, expiration);
     });
     const pageCount = Math.max(1, Math.ceil(matchingProducts.length / productPageSize));
     productPage = Math.max(1, Math.min(productPage, pageCount));
@@ -186,13 +203,13 @@ function renderProducts() {
         row.appendChild(imageCell);
         [product.name, product.category || "N/A",
             typeof product.price === "number" && Number.isFinite(product.price) ? priceFormatter.format(product.price) : "N/A",
-            product.quantity, getLowStockThreshold(product, productSettings),
+            product.quantity, product.effectiveLowStockThreshold,
             formatExpirationDate(product.expirationDate)].forEach(function (value) {
             const cell = document.createElement("td");
             cell.textContent = value;
             row.appendChild(cell);
         });
-        [getStockStatus(product, productSettings), getExpirationStatus(product, productSettings.expirationWarningDays, today)].forEach(function (status) {
+        [product.stockStatus, product.expirationStatus].forEach(function (status) {
             const cell = document.createElement("td");
             const badge = document.createElement("span");
             badge.className = "status-badge status-" + status.toLowerCase().replaceAll(" ", "-");
@@ -256,7 +273,7 @@ function openProductEditor(index = null) {
         productInput("lowStockThreshold").value = productSettings.defaultLowStockThreshold;
     } else {
         productFields.forEach(function (field) { field.value = products[index][field.name] ?? ""; });
-        productInput("lowStockThreshold").value = getLowStockThreshold(products[index], productSettings);
+        productInput("lowStockThreshold").value = products[index].effectiveLowStockThreshold;
     }
     populateCategoryOptions(index === null ? "" : products[index].category);
     editor.hidden = false;
@@ -276,23 +293,29 @@ function closeProductEditor() {
 }
 
 // Compare against the displayed version to avoid overwriting another tab's edits.
-function readProductsForChange(snapshot, feedback) {
+async function readProductsForChange(snapshot, feedback) {
     if (!initializeApp()) return null;
-    storageWarnings.length = 0;
-    const latest = getProducts();
-    if (storageWarnings.length) {
-        feedback.textContent = "Cannot change products while saved data is unreadable. " + storageWarnings.join(" ");
+    let monitoring;
+    try {
+        monitoring = await Sari2Api.request("monitoring");
+    } catch (error) {
+        feedback.textContent = error.message || "Unable to verify the latest inventory. Refresh and try again.";
+        return null;
+    }
+    const latest = monitoring && Array.isArray(monitoring.products) ? monitoring.products : null;
+    if (!latest) {
+        feedback.textContent = "The server returned invalid inventory data. Refresh and try again.";
         return null;
     }
     if (JSON.stringify(latest) !== snapshot) {
-        feedback.textContent = "Inventory changed in another page. Cancel and reopen the form, or refresh before trying again.";
-        refreshProducts();
+        feedback.textContent = "Inventory changed in another session. Cancel and reopen the form, or refresh before trying again.";
+        await refreshProducts();
         return null;
     }
     return latest;
 }
 
-productForm.addEventListener("submit", function (event) {
+productForm.addEventListener("submit", async function (event) {
     event.preventDefault();
     formError.textContent = "";
     const values = {};
@@ -306,41 +329,57 @@ productForm.addEventListener("submit", function (event) {
     });
     const firstInvalid = productFields.find(function (field) { return errors[field.name]; });
     if (firstInvalid) { firstInvalid.focus(); return; }
-    const latest = readProductsForChange(editorSnapshot, formError);
+    const latest = await readProductsForChange(editorSnapshot, formError);
     if (!latest) return;
-    const existingCategory = getProductCategories(latest).find(function (category) {
-        return category.toLowerCase() === values.category.toLowerCase();
+    let category = categories.find(function (item) {
+        return item.name.toLowerCase() === values.category.toLowerCase();
     });
-    values.category = existingCategory || values.category;
-    const product = {
-        ...(editingIndex === null ? {} : latest[editingIndex]),
-        name: values.name, category: values.category, price: Number(values.price),
-        quantity: editingIndex === null ? Number(values.quantity) : latest[editingIndex].quantity,
-        lowStockThreshold: Number(values.lowStockThreshold),
-        expirationDate: values.expirationDate, imageUrl: values.imageUrl
-    };
-    if (editingIndex === null) latest.push(product);
-    else latest[editingIndex] = product;
-    if (!saveProducts(latest)) {
-        formError.textContent = "Unable to save products. Check browser storage and try again.";
-        return;
+    try {
+        if (!category) {
+            category = await Sari2Api.request("categories", {
+                method: "POST",
+                body: { name: values.category }
+            });
+            categories.push(category);
+            pendingCategories = pendingCategories.filter(function (name) {
+                return name.toLowerCase() !== category.name.toLowerCase();
+            });
+        }
+
+        const product = {
+            name: values.name,
+            categoryId: category.id,
+            price: Number(values.price),
+            ...(editingIndex === null ? { quantity: Number(values.quantity) } : {}),
+            lowStockThreshold: Number(values.lowStockThreshold),
+            expirationDate: values.expirationDate,
+            imageUrl: values.imageUrl
+        };
+        const existing = editingIndex === null ? null : latest[editingIndex];
+        await Sari2Api.request(
+            existing ? "products/" + encodeURIComponent(existing.id) : "products",
+            { method: existing ? "PUT" : "POST", body: product }
+        );
+        closeProductEditor();
+        await refreshProducts();
+        productFeedback.textContent = "Product saved.";
+    } catch (error) {
+        formError.textContent = error.message || "Unable to save the product. Try again.";
     }
-    closeProductEditor();
-    refreshProducts();
-    productFeedback.textContent = "Product saved.";
 });
 
-function deleteProduct(index, snapshot) {
-    const latest = readProductsForChange(snapshot, productFeedback);
+async function deleteProduct(index, snapshot) {
+    const latest = await readProductsForChange(snapshot, productFeedback);
     if (!latest || !window.confirm('Delete "' + latest[index].name + '"? Stock movement history will be kept.')) return;
-    latest.splice(index, 1);
-    if (!saveProducts(latest)) {
-        productFeedback.textContent = "Unable to delete the product. Check browser storage and try again.";
+    try {
+        await Sari2Api.request("products/" + encodeURIComponent(latest[index].id), { method: "DELETE" });
+        closeProductEditor();
+        await refreshProducts();
+        productFeedback.textContent = "Product deleted.";
+    } catch (error) {
+        productFeedback.textContent = error.message || "Unable to delete the product. Try again.";
         return;
     }
-    closeProductEditor();
-    refreshProducts();
-    productFeedback.textContent = "Product deleted.";
 }
 
 document.getElementById("add-product").addEventListener("click", function () { openProductEditor(); });
@@ -379,7 +418,10 @@ function initializeProductFiltersFromUrl() {
 
 initializeProductFiltersFromUrl();
 refreshProducts();
-window.addEventListener("pageshow", refreshProducts);
+window.addEventListener("pageshow", function (event) {
+    if (event.persisted) refreshProducts();
+});
+window.addEventListener("focus", refreshProducts);
 window.addEventListener("storage", function (event) {
-    if (event.key === "sari2_products" || event.key === "sari2_settings" || event.key === null) refreshProducts();
+    if (event.key === "sari2_settings" || event.key === null) refreshProducts();
 });

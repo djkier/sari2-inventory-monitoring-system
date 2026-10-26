@@ -8,6 +8,7 @@
     <link rel="stylesheet" href="../../css/style.css">
     <link rel="stylesheet" href="../../css/public.css">
     <script src="../../js/storage.js" defer></script>
+    <script src="../../js/api.js" defer></script>
     <script src="../../js/auth.js" defer></script>
 </head>
 <body>
@@ -28,13 +29,13 @@
             <h1 id="login-title">Log in to Sari2</h1>
             <p class="login-introduction">Access your store's inventory with your Store Owner or Store Staff account.</p>
             <noscript><p>Please enable JavaScript to log in.</p></noscript>
-            <form id="login-form" novalidate>
+            <form id="login-form" autocomplete="off" novalidate>
                 <fieldset id="login-fields" disabled>
                     <legend class="visually-hidden">Login details</legend>
                     <div class="form-group test-account-row">
                         <label for="test-account">Test Account</label>
                         <select id="test-account">
-                            <option value="">Select Test Account</option>
+                            <option value="">Choose Account</option>
                         </select>
                     </div>
                     <div class="form-group">
@@ -44,7 +45,7 @@
                     </div>
                     <div class="form-group">
                         <label for="login-password">Password</label>
-                        <input id="login-password" name="password" type="password" autocomplete="current-password" required aria-describedby="login-password-error">
+                        <input id="login-password" name="password" type="password" autocomplete="off" required aria-describedby="login-password-error">
                         <p class="field-error" id="login-password-error"></p>
                     </div>
                     <button class="btn-primary" type="submit">Login</button>

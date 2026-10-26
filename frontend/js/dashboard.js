@@ -57,7 +57,7 @@ async function loadDashboard(forceRefresh = false) {
     dashboardFeedback.textContent = "";
     try {
         const data = await dashboardRequest.run(async function () {
-            const context = forceRefresh ? await initializeApp(true) : await appReady;
+            const context = initializeApp();
             if (!context) return null;
             return Sari2Api.request("/dashboard");
         });

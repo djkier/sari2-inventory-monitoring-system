@@ -1,23 +1,40 @@
 const settingsForm = document.getElementById("settings-form");
 const settingsFields = Array.from(settingsForm.querySelectorAll("input"));
+const settingsSubmit = settingsForm.querySelector("button[type='submit']");
+let settingsLoadRequest = null;
 
-function loadSettingsForm() {
-    if (!initializeApp()) return;
-    storageWarnings.length = 0;
-    const settings = getSettings();
-    settingsFields.forEach(function (field) {
-        field.value = settings[field.name];
-        field.removeAttribute("aria-invalid");
-        document.getElementById(field.id + "-error").textContent = "";
-    });
-    document.getElementById("store-name").textContent = settings.storeName;
-    document.getElementById("settings-error").textContent = storageWarnings.join(" ");
-    document.getElementById("settings-feedback").textContent = "";
+function showStoreName(name) {
+    const storeName = document.getElementById("store-name");
+    if (storeName) storeName.textContent = name;
 }
 
-settingsForm.addEventListener("submit", function (event) {
+function loadSettingsForm() {
+    if (!initializeApp()) return Promise.resolve();
+    if (settingsLoadRequest) return settingsLoadRequest;
+
+    document.getElementById("settings-feedback").textContent = "";
+    settingsLoadRequest = Sari2Api.request("settings").then(function (settings) {
+        settingsFields.forEach(function (field) {
+            field.value = settings[field.name] ?? "";
+            field.removeAttribute("aria-invalid");
+            document.getElementById(field.id + "-error").textContent = "";
+        });
+        showStoreName(settings.storeName);
+        document.getElementById("settings-error").textContent = "";
+    }).catch(function (error) {
+        document.getElementById("settings-error").textContent =
+            error.message || "Unable to load store settings.";
+    }).finally(function () {
+        settingsLoadRequest = null;
+    });
+
+    return settingsLoadRequest;
+}
+
+settingsForm.addEventListener("submit", async function (event) {
     event.preventDefault();
-    if (!initializeApp()) return;
+    if (!initializeApp() || settingsSubmit.disabled) return;
+
     const settings = {};
     let firstInvalid = null;
     document.getElementById("settings-error").textContent = "";
@@ -40,21 +57,25 @@ settingsForm.addEventListener("submit", function (event) {
         if (error && !firstInvalid) firstInvalid = field;
     });
     if (firstInvalid) { firstInvalid.focus(); return; }
-    if (!saveSettings(settings)) {
-        document.getElementById("settings-error").textContent = "Unable to save settings. Check browser storage and try again.";
-        return;
+
+    settingsSubmit.disabled = true;
+    try {
+        const saved = await Sari2Api.request("settings", {
+            method: "PUT",
+            body: settings
+        });
+        settingsFields.forEach(function (field) {
+            field.value = saved[field.name] ?? "";
+        });
+        showStoreName(saved.storeName);
+        document.getElementById("settings-success-dialog").showModal();
+    } catch (error) {
+        document.getElementById("settings-error").textContent =
+            error.message || "Unable to save store settings.";
+    } finally {
+        settingsSubmit.disabled = false;
     }
-    loadSettingsForm();
-    document.getElementById("settings-success-dialog").showModal();
 });
 
 loadSettingsForm();
 window.addEventListener("pageshow", loadSettingsForm);
-window.addEventListener("storage", function (event) {
-    if (event.key === "sari2_settings" || event.key === null) {
-        // Preserve unsaved input; make the external change visible instead of replacing it.
-        if (!initializeApp()) return;
-        document.getElementById("store-name").textContent = getSettings().storeName;
-        document.getElementById("settings-feedback").textContent = "Settings changed in another page. Reload to view them, or save to use the values in this form.";
-    }
-});
