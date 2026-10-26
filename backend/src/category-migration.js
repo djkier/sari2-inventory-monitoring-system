@@ -82,3 +82,22 @@ function planCategoryMigration(categories, products, validStoreIds) {
         products: migratedProducts
     };
 }
+
+async function migrateLegacyCategories() {
+    const stores = await readJson("stores");
+    const validStoreIds = new Set(stores
+        .filter(function (store) { return store && typeof store.id === "string"; })
+        .map(function (store) { return store.id; }));
+    return mutateJsonStores(["categories", "products"], function (data) {
+        const plan = planCategoryMigration(data.categories, data.products, validStoreIds);
+        return {
+            values: { categories: plan.categories, products: plan.products },
+            result: plan
+        };
+    });
+}
+
+module.exports = {
+    migrateLegacyCategories,
+    planCategoryMigration
+};
