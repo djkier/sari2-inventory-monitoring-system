@@ -1,0 +1,4 @@
+node_modules/
+data/contact-messages.json
+data/*.tmp
+data/.*.tmp
