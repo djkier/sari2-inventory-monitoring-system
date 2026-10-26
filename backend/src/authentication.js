@@ -40,7 +40,7 @@ function findAvailableStoreCode(stores) {
 
 function assertDemoUsernameAvailable(users, demoUser) {
     const conflictingUser = users.find(function (user) {
-        return user && normalizeUsername(user.username) === demoUser.username && user.id !== demoUser.id;
+        return user && user.username === demoUser.username && user.id !== demoUser.id;
     });
     if (conflictingUser) {
         throw new AppError(
@@ -141,7 +141,7 @@ async function authenticate(input) {
     const credentials = validateLogin(input);
     const users = await readJson("users");
     const user = users.find(function (item) {
-        return item && normalizeUsername(item.username) === credentials.username &&
+        return item && item.username === credentials.username &&
             item.password === credentials.password;
     });
     if (!user) {

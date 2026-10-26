@@ -192,8 +192,18 @@ if (signupForm) {
         }
 
         let message = "";
-        if (!field.value.trim()) {
+        const preservesWhitespace = field === usernameInput || field === password || field === confirmation;
+        if (preservesWhitespace ? !field.value : !field.value.trim()) {
             message = "Please complete this field.";
+        } else if (field === usernameInput && !/^[A-Za-z0-9_]{3,}$/.test(field.value)) {
+            message = "Username must be at least 3 characters and contain only letters, numbers, and underscores.";
+        } else if (field === password && field.value.length < 6) {
+            message = "Password must be at least 6 characters.";
+        } else if (field === password && /\s/.test(field.value)) {
+            message = "Password must not contain spaces.";
+        } else if (field === password &&
+            (!/[A-Za-z]/.test(field.value) || !/[0-9]/.test(field.value))) {
+            message = "Password must contain at least one letter and one number.";
         } else if (field.id === "signup-role" &&
             !allowedRoles.includes(field.value)) {
             message = "Please select Store Owner or Store Staff.";
