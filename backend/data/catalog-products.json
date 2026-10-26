@@ -23,4 +23,27 @@
     "imageUrl": "",
     "sourceProductId": "10000000-0000-4000-8000-000000000004"
   },
-  
+    {
+    "id": "a0dcac97-327a-4343-ad26-8dd160794252",
+    "name": "Nestle Fresh Milk 1L",
+    "imageUrl": "",
+    "sourceProductId": "10000000-0000-4000-8000-000000000005"
+  },
+  {
+    "id": "bfc9d32f-1c7d-459a-a241-dee1ffaffeb8",
+    "name": "Yakult 80ml",
+    "imageUrl": "",
+    "sourceProductId": "10000000-0000-4000-8000-000000000006"
+  },
+  {
+    "id": "315dbe90-c422-4543-b230-6177ed891c1d",
+    "name": "Fudgee Barr Chocolate 40g",
+    "imageUrl": "",
+    "sourceProductId": "10000000-0000-4000-8000-000000000007"
+  },
+  {
+    "id": "b289604a-4216-4809-bd04-07060b42be71",
+    "name": "Rebisco Crackers 32g",
+    "imageUrl": "",
+    "sourceProductId": "10000000-0000-4000-8000-000000000008"
+  },
