@@ -76,3 +76,71 @@ function validateImageUpload(buffer, contentType) {
     }
     return mimeType;
 }
+
+async function saveCatalogImage(catalogProductId, buffer, contentType) {
+    const mimeType = validateImageUpload(buffer, contentType);
+    await initializeImageStorage();
+    const fileName = crypto.randomUUID() + imageTypes[mimeType];
+    const filePath = getManagedImagePath(fileName);
+    await fs.writeFile(filePath, buffer, { flag: "wx" });
+
+    let outcome;
+    try {
+        outcome = await mutateJsonStores(["catalogProducts", "products"], function (data) {
+            const catalogIndex = data.catalogProducts.findIndex(function (catalogProduct) {
+                return catalogProduct && catalogProduct.id === catalogProductId;
+            });
+            if (catalogIndex === -1) {
+                throw new AppError(404, "CATALOG_PRODUCT_NOT_FOUND", "Catalog product not found.", {
+                    id: catalogProductId
+                });
+            }
+
+            const previous = data.catalogProducts[catalogIndex];
+            const catalogProduct = {
+                ...previous,
+                imageUrl: imageUrlPrefix + fileName,
+                imageFileName: fileName,
+                imageMimeType: mimeType,
+                imageSize: buffer.length
+            };
+            const catalogProducts = data.catalogProducts.slice();
+            catalogProducts[catalogIndex] = catalogProduct;
+            const products = data.products.map(function (product) {
+                return product && product.catalogProductId === catalogProductId
+                    ? { ...product, imageUrl: catalogProduct.imageUrl }
+                    : product;
+            });
+            return {
+                values: { catalogProducts: catalogProducts, products: products },
+                result: {
+                    catalogProduct: publicCatalogProduct(catalogProduct),
+                    previousFileName: previous.imageFileName || "",
+                    previousFileStillReferenced: catalogProducts.some(function (item) {
+                        return item && item.id !== catalogProductId &&
+                            item.imageFileName === previous.imageFileName;
+                    })
+                }
+            };
+        });
+    } catch (error) {
+        await removeManagedImage(fileName).catch(function () {});
+        throw error;
+    }
+
+    if (outcome.previousFileName && outcome.previousFileName !== fileName &&
+        !outcome.previousFileStillReferenced) {
+        await removeManagedImage(outcome.previousFileName);
+    }
+    return outcome.catalogProduct;
+}
+
+module.exports = {
+    imageDirectory,
+    imageTypes,
+    imageUrlPrefix,
+    initializeImageStorage,
+    maxImageBytes,
+    saveCatalogImage,
+    validateImageUpload
+};
