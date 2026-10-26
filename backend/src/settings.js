@@ -137,3 +137,50 @@ async function migrateLegacySettings(demoStoreId) {
     });
 }
 
+async function getSettings(storeId, role) {
+    const [stores, settings] = await Promise.all([readJson("stores"), readJson("settings")]);
+    const store = stores.find(function (item) { return item && item.id === storeId; });
+    if (!store) throw new AppError(404, "STORE_NOT_FOUND", "Store not found.");
+
+    const record = settings[storeId]
+        ? validateStoredRecord(settings[storeId], store)
+        : createSettingsRecord(store);
+    return safeSettings(record, store, role);
+}
+
+async function updateSettings(input, storeId, role) {
+    const values = validateSettings(input);
+    return mutateJsonStores(["stores", "settings"], function (data) {
+        const storeIndex = data.stores.findIndex(function (item) {
+            return item && item.id === storeId;
+        });
+        if (storeIndex === -1) throw new AppError(404, "STORE_NOT_FOUND", "Store not found.");
+
+        const stores = data.stores.slice();
+        const store = {
+            ...stores[storeIndex],
+            name: values.storeName,
+            normalizedName: normalizeStoreName(values.storeName)
+        };
+        stores[storeIndex] = store;
+
+        const record = createSettingsRecord(store, values);
+        return {
+            values: {
+                stores: stores,
+                settings: { ...data.settings, [storeId]: record }
+            },
+            result: { store: store, settings: safeSettings(record, store, role) }
+        };
+    });
+}
+
+module.exports = {
+    createSettingsRecord,
+    defaultSettings,
+    getSettings,
+    migrateLegacySettings,
+    safeSettings,
+    updateSettings,
+    validateSettings
+};
