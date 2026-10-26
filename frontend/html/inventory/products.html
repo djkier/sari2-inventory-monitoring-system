@@ -17,3 +17,27 @@
     <noscript><p>Please enable JavaScript and <a href="../frontfacing/login.html">log in</a> to access Sari2.</p></noscript>
 
     <div id="app-shell" class="app-shell" hidden>
+         <aside class="app-sidebar">
+            <a class="app-brand" href="dashboard.html">Sari<span>2</span></a>
+            <p class="app-sidebar-label">Inventory management</p>
+            <nav class="app-nav" aria-label="Application navigation">
+                <a href="dashboard.html">Dashboard</a>
+                <a href="products.html" aria-current="page">Products</a>
+                <a href="stock.html">Stock Movement</a>
+                <a href="expiration.html">Expiration</a>
+            </nav>
+            <nav class="app-nav app-nav-secondary" aria-label="Account and settings">
+                <a href="settings.html">Settings</a>
+                <button id="logout-button" type="button">Logout</button>
+            </nav>
+            <p id="app-feedback" class="field-error" role="alert"></p>
+        </aside>
+
+        <div class="app-workspace">
+            <header class="app-header">
+                <p id="store-name"></p>
+                <div class="app-user" aria-label="Logged-in user">
+                    <strong id="current-user-name"></strong>
+                    <span id="current-user-role"></span>
+                </div>
+            </header>
