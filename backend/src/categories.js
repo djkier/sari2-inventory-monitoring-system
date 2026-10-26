@@ -104,3 +104,36 @@ async function updateCategory(id, input, storeId) {
         };
     });
 }
+
+async function deleteCategory(id, storeId) {
+    return mutateJsonStores(["categories", "products"], function (data) {
+        const index = findCategoryIndex(data.categories, id, storeId);
+        if (index === -1) throw categoryNotFound(id);
+        const referenced = data.products.some(function (product) {
+            return product && product.storeId === storeId && product.categoryId === id;
+        });
+        if (referenced) {
+            throw new AppError(409, "CATEGORY_IN_USE", "Category cannot be deleted while products use it.", {
+                id: id
+            });
+        }
+
+        const deletedCategory = data.categories[index];
+        const categories = data.categories.slice();
+        categories.splice(index, 1);
+        return {
+            values: { categories: categories, products: data.products },
+            result: deletedCategory
+        };
+    });
+}
+
+module.exports = {
+    createCategory,
+    deleteCategory,
+    getCategory,
+    listCategories,
+    normalizeCategoryName,
+    updateCategory,
+    validateCategoryInput
+};
