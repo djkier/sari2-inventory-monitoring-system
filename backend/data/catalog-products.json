@@ -1,0 +1,74 @@
+[
+  {
+    "id": "69f4bd01-0252-4df5-b226-a1528a020d1c",
+    "name": "Coca-Cola 1L",
+    "imageUrl": "",
+    "sourceProductId": "10000000-0000-4000-8000-000000000001"
+  },
+  {
+    "id": "04add543-d09f-4868-8577-43818896659d",
+    "name": "Lucky Me Pancit Canton 80g",
+    "imageUrl": "",
+    "sourceProductId": "10000000-0000-4000-8000-000000000002"
+  },
+  {
+    "id": "4a1f7a03-36fb-441d-ab32-f4d01b6ca04b",
+    "name": "Argentina Corned Beef 150g",
+    "imageUrl": "",
+    "sourceProductId": "10000000-0000-4000-8000-000000000003"
+  },
+  {
+    "id": "e7a176ee-28ed-48d0-b771-1d5dc5d245c8",
+    "name": "Gardenia Classic Bread 400g",
+    "imageUrl": "",
+    "sourceProductId": "10000000-0000-4000-8000-000000000004"
+  },
+  {
+    "id": "a0dcac97-327a-4343-ad26-8dd160794252",
+    "name": "Nestle Fresh Milk 1L",
+    "imageUrl": "",
+    "sourceProductId": "10000000-0000-4000-8000-000000000005"
+  },
+  {
+    "id": "bfc9d32f-1c7d-459a-a241-dee1ffaffeb8",
+    "name": "Yakult 80ml",
+    "imageUrl": "",
+    "sourceProductId": "10000000-0000-4000-8000-000000000006"
+  },
+  {
+    "id": "315dbe90-c422-4543-b230-6177ed891c1d",
+    "name": "Fudgee Barr Chocolate 40g",
+    "imageUrl": "",
+    "sourceProductId": "10000000-0000-4000-8000-000000000007"
+  },
+  {
+    "id": "b289604a-4216-4809-bd04-07060b42be71",
+    "name": "Rebisco Crackers 32g",
+    "imageUrl": "",
+    "sourceProductId": "10000000-0000-4000-8000-000000000008"
+  },
+  {
+    "id": "21cc8b39-bb2a-4b34-b45d-a7a07c6412c2",
+    "name": "Pandesal Pack of 6",
+    "imageUrl": "",
+    "sourceProductId": "10000000-0000-4000-8000-000000000009"
+  },
+  {
+    "id": "da47eb77-40a4-4bb1-af93-8c50b0c07a33",
+    "name": "Nescafe 3-in-1 Original 27.5g",
+    "imageUrl": "",
+    "sourceProductId": "10000000-0000-4000-8000-000000000010"
+  },
+  {
+    "id": "16766580-6af7-4c7d-8bd5-35ce493e4dea",
+    "name": "Plastic Sando Bags Pack of 100",
+    "imageUrl": "",
+    "sourceProductId": "10000000-0000-4000-8000-000000000011"
+  },
+  {
+    "id": "af19e9b4-73ba-4885-9f3e-40f04effd208",
+    "name": "Scrubbing Sponge",
+    "imageUrl": "",
+    "sourceProductId": "10000000-0000-4000-8000-000000000012"
+  }
+]
