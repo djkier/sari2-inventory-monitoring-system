@@ -92,3 +92,18 @@ function planCatalogMigration(catalogProducts, products) {
         products: migratedProducts
     };
 }
+
+function migrateLegacyCatalogProducts() {
+    return mutateJsonStores(["catalogProducts", "products"], function (data) {
+        const plan = planCatalogMigration(data.catalogProducts, data.products);
+        return {
+            values: { catalogProducts: plan.catalogProducts, products: plan.products },
+            result: plan
+        };
+    });
+}
+
+module.exports = {
+    migrateLegacyCatalogProducts,
+    planCatalogMigration
+};
