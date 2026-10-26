@@ -3,14 +3,6 @@ const editor = document.getElementById("product-editor");
 const productFields = Array.from(productForm.querySelectorAll("input, select"));
 const productFeedback = document.getElementById("products-feedback");
 const formError = document.getElementById("product-form-error");
-const categoryDialog = document.getElementById("category-dialog");
-const categoryForm = document.getElementById("category-form");
-const categoryRecord = document.getElementById("category-record");
-const categoryName = document.getElementById("category-name");
-const categoryError = document.getElementById("category-name-error");
-const deleteCategoryButton = document.getElementById("delete-category");
-const saveCategoryButton = document.getElementById("save-category");
-const manageCategoriesButton = document.getElementById("manage-categories");
 const addProductButton = document.getElementById("add-product");
 const catalogSelect = document.getElementById("product-catalogProductId");
 const imageFileInput = document.getElementById("product-imageFile");
@@ -27,7 +19,6 @@ let productsLoaded = false;
 let productsLoading = false;
 let productsLoadError = "";
 let productMutationPending = false;
-let categoryMutationPending = false;
 const productPageSize = 10;
 let productPage = 1;
 const productLoadGuard = Sari2Api.createRequestGuard(function (pending) {
@@ -36,10 +27,6 @@ const productLoadGuard = Sari2Api.createRequestGuard(function (pending) {
 });
 const productMutationGuard = Sari2Api.createRequestGuard(function (pending) {
     productMutationPending = pending;
-    updateInteractionState();
-});
-const categoryMutationGuard = Sari2Api.createRequestGuard(function (pending) {
-    categoryMutationPending = pending;
     updateInteractionState();
 });
 
@@ -51,10 +38,6 @@ function productInput(name) {
 function productFieldError(name) {
     if (name === "categoryId") return document.getElementById("product-category-error");
     return document.getElementById("product-" + name + "-error");
-}
-
-function normalizeCategory(value) {
-    return typeof value === "string" ? value.trim().replace(/\s+/g, " ") : "";
 }
 
 function findCategory(categoryId) {
@@ -119,7 +102,7 @@ function populateCategoryOptions(selectedCategoryId = "") {
     select.replaceChildren();
     [["", "Select Category"]].concat(categories.map(function (category) {
         return [category.id, category.name];
-    }), [["new", "+ Add New Category"]]).forEach(function (entry) {
+    })).forEach(function (entry) {
         const option = document.createElement("option");
         option.value = entry[0];
         option.textContent = entry[1];
@@ -127,105 +110,6 @@ function populateCategoryOptions(selectedCategoryId = "") {
     });
     select.value = findCategory(selectedCategoryId) ? selectedCategoryId : "";
 }
-
-function populateCategoryManager(selectedCategoryId = "") {
-    categoryRecord.replaceChildren();
-    const createOption = document.createElement("option");
-    createOption.value = "";
-    createOption.textContent = "+ Add New Category";
-    categoryRecord.appendChild(createOption);
-    categories.forEach(function (category) {
-        const option = document.createElement("option");
-        option.value = category.id;
-        option.textContent = category.name;
-        categoryRecord.appendChild(option);
-    });
-    categoryRecord.value = findCategory(selectedCategoryId) ? selectedCategoryId : "";
-    const selected = findCategory(categoryRecord.value);
-    categoryName.value = selected ? selected.name : "";
-    document.getElementById("category-dialog-title").textContent = selected ? "Edit Category" : "Add New Category";
-    saveCategoryButton.textContent = selected ? "Save Category" : "Add Category";
-    deleteCategoryButton.hidden = !selected;
-}
-
-function openCategoryDialog(selectedCategoryId = "") {
-    if (!productsLoaded || productsLoading || productMutationPending || categoryMutationPending) return;
-    categoryError.textContent = "";
-    categoryName.removeAttribute("aria-invalid");
-    populateCategoryManager(selectedCategoryId);
-    categoryDialog.showModal();
-    categoryName.focus();
-}
-
-function cancelCategoryDialog() {
-    if (productInput("category").value === "new") productInput("category").value = "";
-    categoryDialog.close();
-}
-
-categoryForm.addEventListener("submit", async function (event) {
-    event.preventDefault();
-    if (productsLoading || productMutationPending || categoryMutationPending) return;
-    const name = normalizeCategory(categoryName.value);
-    const selectedId = categoryRecord.value;
-    const duplicate = categories.some(function (category) {
-        return category.id !== selectedId && category.name.toLowerCase() === name.toLowerCase();
-    });
-    categoryError.textContent = !name ? "Enter a category name." :
-        duplicate ? "This category already exists. Select it from the Category dropdown." : "";
-    categoryName.setAttribute("aria-invalid", categoryError.textContent ? "true" : "false");
-    if (categoryError.textContent) { categoryName.focus(); return; }
-
-    await categoryMutationGuard.run(async function () {
-        try {
-            const saved = await Sari2Api.request(
-                selectedId ? "categories/" + encodeURIComponent(selectedId) : "categories",
-                { method: selectedId ? "PUT" : "POST", body: { name: name } }
-            );
-            const reloaded = await refreshProducts();
-            if (reloaded && findCategory(saved.id)) productInput("category").value = saved.id;
-            productInput("category").removeAttribute("aria-invalid");
-            document.getElementById("product-category-error").textContent = "";
-            categoryDialog.close();
-            productFeedback.textContent = reloaded
-                ? (selectedId ? "Category updated." : "Category added.")
-                : "Category saved, but the updated category list could not be loaded.";
-        } catch (error) {
-            categoryError.textContent = getApiErrorMessage(error, "Unable to save the category. Try again.");
-            categoryName.setAttribute("aria-invalid", "true");
-        }
-    });
-});
-categoryRecord.addEventListener("change", function () {
-    populateCategoryManager(categoryRecord.value);
-    categoryError.textContent = "";
-    categoryName.removeAttribute("aria-invalid");
-    categoryName.focus();
-});
-deleteCategoryButton.addEventListener("click", async function () {
-    if (productsLoading || productMutationPending || categoryMutationPending) return;
-    const category = findCategory(categoryRecord.value);
-    if (!category || !window.confirm('Delete category "' + category.name + '"?')) return;
-
-    await categoryMutationGuard.run(async function () {
-        try {
-            await Sari2Api.request("categories/" + encodeURIComponent(category.id), { method: "DELETE" });
-            const reloaded = await refreshProducts();
-            if (productInput("category").value === category.id) productInput("category").value = "";
-            categoryDialog.close();
-            productFeedback.textContent = reloaded
-                ? "Category deleted."
-                : "Category deleted, but the updated category list could not be loaded.";
-        } catch (error) {
-            categoryError.textContent = getApiErrorMessage(error, "Unable to delete the category. Try again.");
-        }
-    });
-});
-document.getElementById("cancel-category").addEventListener("click", cancelCategoryDialog);
-categoryDialog.addEventListener("cancel", function (event) {
-    event.preventDefault();
-    cancelCategoryDialog();
-});
-categoryDialog.addEventListener("close", function () { productInput("category").focus(); });
 
 function isProductImageUrl(value) {
     try {
@@ -268,7 +152,7 @@ function getApiErrorMessage(error, fallback) {
 }
 
 function updateInteractionState() {
-    const mutationPending = productMutationPending || categoryMutationPending;
+    const mutationPending = productMutationPending;
     addProductButton.disabled = productsLoading || mutationPending || !productsLoaded || !editor.hidden;
     productForm.querySelectorAll("button").forEach(function (button) {
         button.disabled = mutationPending || productsLoading;
@@ -276,11 +160,7 @@ function updateInteractionState() {
     document.querySelectorAll("#products-list button").forEach(function (button) {
         button.disabled = mutationPending || productsLoading;
     });
-    categoryForm.querySelectorAll("input, select, button").forEach(function (field) {
-        field.disabled = mutationPending || productsLoading;
-    });
     productForm.setAttribute("aria-busy", mutationPending ? "true" : "false");
-    categoryForm.setAttribute("aria-busy", categoryMutationPending ? "true" : "false");
 }
 
 async function refreshProducts(forceRefresh = false) {
@@ -480,7 +360,7 @@ function renderProducts() {
 }
 
 function openProductEditor(productId = null) {
-    if (!initializeApp() || !productsLoaded || productMutationPending || categoryMutationPending) return;
+    if (!initializeApp() || !productsLoaded || productMutationPending) return;
     const product = productId === null ? null : products.find(function (item) { return item.id === productId; });
     if (productId !== null && !product) {
         productFeedback.textContent = "This product is no longer available. Refresh and try again.";
@@ -529,13 +409,12 @@ function closeProductEditor() {
 
 productForm.addEventListener("submit", async function (event) {
     event.preventDefault();
-    if (productsLoading || productMutationPending || categoryMutationPending) return;
+    if (productsLoading || productMutationPending) return;
     formError.textContent = "";
     const values = {};
     productFields.forEach(function (field) {
         values[field.name] = field.type === "file" ? "" : field.value.trim();
     });
-    if (values.categoryId === "new") values.categoryId = "";
     const imageFile = imageFileInput.files[0] || null;
     const errors = validateProductValues(values, editingId !== null);
     productFields.forEach(function (field) {
@@ -603,7 +482,7 @@ productForm.addEventListener("submit", async function (event) {
 });
 
 async function deleteProduct(productId) {
-    if (productsLoading || productMutationPending || categoryMutationPending) return;
+    if (productsLoading || productMutationPending) return;
     const product = products.find(function (item) { return item.id === productId; });
     if (!product) {
         productFeedback.textContent = "This product is no longer available. Refresh and try again.";
@@ -643,13 +522,6 @@ imageFileInput.addEventListener("change", function () {
     productFieldError("imageFile").textContent = "";
     imageFileInput.removeAttribute("aria-invalid");
     syncCatalogFields();
-});
-productInput("category").addEventListener("change", function () {
-    if (productInput("category").value === "new") openCategoryDialog();
-});
-manageCategoriesButton.addEventListener("click", function () {
-    const selectedId = productInput("category").value;
-    openCategoryDialog(findCategory(selectedId) ? selectedId : "");
 });
 document.getElementById("cancel-product").addEventListener("click", closeProductEditor);
 document.getElementById("product-search").addEventListener("input", function () {

@@ -64,8 +64,8 @@
                         </div>
                         <div class="form-group">
                             <label for="product-category">Category</label>
-                            <select id="product-category" name="categoryId" required aria-describedby="product-category-error"></select>
-                            <button id="manage-categories" class="btn-secondary" type="button">Manage Categories</button>
+                            <select id="product-category" name="categoryId" required aria-describedby="product-category-help product-category-error"></select>
+                            <p id="product-category-help" class="product-form-help">To add, edit, or delete categories, go to Settings.</p>
                             <p class="field-error" id="product-category-error"></p>
                         </div>
                         <div class="form-group">
@@ -108,26 +108,6 @@
                         </div>
                     </form>
                 </section>
-
-                <dialog id="category-dialog" class="category-dialog" aria-labelledby="category-dialog-title">
-                    <h2 id="category-dialog-title">Manage Categories</h2>
-                    <form id="category-form" novalidate>
-                        <div class="form-group">
-                            <label for="category-record">Category to manage</label>
-                            <select id="category-record" aria-describedby="category-name-error"></select>
-                        </div>
-                        <div class="form-group">
-                            <label for="category-name">Category Name</label>
-                            <input id="category-name" type="text" required aria-describedby="category-name-error">
-                            <p id="category-name-error" class="field-error" role="alert"></p>
-                        </div>
-                        <div class="product-actions">
-                            <button id="cancel-category" class="btn-secondary" type="button">Cancel</button>
-                            <button id="delete-category" class="btn-danger" type="button" hidden>Delete Category</button>
-                            <button id="save-category" class="btn-primary" type="submit">Add Category</button>
-                        </div>
-                    </form>
-                </dialog>
 
                 <div class="product-filters">
                     <div class="form-group"><label for="product-search">Search product name</label><input id="product-search" type="search" placeholder="Search products"></div>
