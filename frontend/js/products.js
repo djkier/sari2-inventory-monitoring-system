@@ -282,3 +282,200 @@ function updateInteractionState() {
     productForm.setAttribute("aria-busy", mutationPending ? "true" : "false");
     categoryForm.setAttribute("aria-busy", categoryMutationPending ? "true" : "false");
 }
+
+async function refreshProducts(forceRefresh = false) {
+    productsLoadError = "";
+    document.getElementById("products-warning").textContent = "Loading products...";
+
+    return productLoadGuard.run(async function () {
+        try {
+            const context = forceRefresh ? await initializeApp(true) : await appReady;
+            if (!context) {
+                throw new Sari2Api.ApiError("AUTHENTICATION_REQUIRED", "Unable to load products.");
+            }
+            const selectedCategoryId = productInput("category").value;
+            const results = await Promise.all([
+                Sari2Api.request("/monitoring"),
+                Sari2Api.request("/categories"),
+                Sari2Api.request("/catalog-products")
+            ]);
+            const monitoring = results[0];
+            const loadedCategories = results[1];
+            const loadedCatalogProducts = results[2];
+            if (!monitoring || !Array.isArray(monitoring.products) ||
+                !Array.isArray(loadedCategories) ||
+                !Array.isArray(loadedCatalogProducts) ||
+                !Number.isSafeInteger(monitoring.defaultLowStockThreshold) ||
+                !Number.isSafeInteger(monitoring.expirationWarningDays) || !monitoring.counts ||
+                !Number.isSafeInteger(monitoring.counts.invalidDate) ||
+                monitoring.products.some(function (product) {
+                    return !product || typeof product.name !== "string" ||
+                        typeof product.categoryId !== "string" || !product.categoryId ||
+                        !Number.isSafeInteger(product.effectiveLowStockThreshold) ||
+                        !["In Stock", "Low Stock", "Out of Stock"].includes(product.stockStatus) ||
+                        !["Safe", "Expiring Soon", "Expired", "No Expiration", "Invalid Date"].includes(product.expirationStatus);
+                }) || loadedCategories.some(function (category) {
+                    return !category || typeof category.id !== "string" || !category.id ||
+                        typeof category.name !== "string" || !category.name.trim();
+                }) || loadedCatalogProducts.some(function (catalogProduct) {
+                    return !catalogProduct || typeof catalogProduct.id !== "string" || !catalogProduct.id ||
+                        typeof catalogProduct.name !== "string" || !catalogProduct.name.trim() ||
+                        typeof catalogProduct.imageUrl !== "string";
+                })) {
+                throw new Sari2Api.ApiError("INVALID_RESPONSE", "The server returned invalid monitoring data.");
+            }
+            products = monitoring.products;
+            categories = loadedCategories.slice().sort(function (first, second) {
+                return first.name.localeCompare(second.name, "en", { sensitivity: "base" });
+            });
+            catalogProducts = loadedCatalogProducts.slice().sort(function (first, second) {
+                return first.name.localeCompare(second.name, "en", { sensitivity: "base" });
+            });
+            if (products.some(function (product) { return !findCategory(product.categoryId); })) {
+                throw new Sari2Api.ApiError("INVALID_RESPONSE", "The server returned an invalid product category.");
+            }
+            if (products.some(function (product) { return !findCatalogProduct(product.catalogProductId); })) {
+                throw new Sari2Api.ApiError("INVALID_RESPONSE", "The server returned an invalid shared catalog product.");
+            }
+            populateCategoryOptions(selectedCategoryId);
+            productSettings = {
+                defaultLowStockThreshold: monitoring.defaultLowStockThreshold,
+                expirationWarningDays: monitoring.expirationWarningDays
+            };
+            productsLoaded = true;
+            productsLoadError = "";
+            document.getElementById("products-warning").textContent = monitoring.counts.invalidDate > 0
+                ? "Some products have invalid expiration dates and are excluded from expiration monitoring."
+                : "";
+            return true;
+        } catch (error) {
+            products = [];
+            categories = [];
+            catalogProducts = [];
+            populateCategoryOptions();
+            productSettings = null;
+            productsLoaded = false;
+            productsLoadError = getApiErrorMessage(error, "Unable to load products.");
+            document.getElementById("products-warning").textContent = productsLoadError;
+            return false;
+        }
+    });
+}
+
+function matchesProductFilters(product, search, stock, expiration) {
+    return product.name.toLowerCase().includes(search.toLowerCase().trim()) &&
+        (!stock || product.stockStatus === stock) &&
+        (!expiration || product.expirationStatus === expiration);
+}
+
+function createProductImage(product) {
+    const wrapper = document.createElement("span");
+    function showFallback() {
+        wrapper.replaceChildren();
+        wrapper.className = "product-image-fallback";
+        wrapper.textContent = "No image";
+    }
+    if (!isProductImageUrl(product.imageUrl)) {
+        showFallback();
+        return wrapper;
+    }
+    const image = document.createElement("img");
+    image.className = "product-image";
+    image.alt = product.name;
+    image.loading = "lazy";
+    image.referrerPolicy = "no-referrer";
+    image.addEventListener("error", showFallback, { once: true });
+    image.src = product.imageUrl;
+    wrapper.appendChild(image);
+    return wrapper;
+}
+
+function renderProducts() {
+    const body = document.getElementById("products-list");
+    body.replaceChildren();
+    if (productsLoading || productsLoadError) {
+        const row = document.createElement("tr");
+        const cell = document.createElement("td");
+        cell.colSpan = 10;
+        cell.className = "empty-state";
+        cell.textContent = productsLoading ? "Loading products..." : "Products could not be loaded.";
+        row.appendChild(cell);
+        body.appendChild(row);
+        document.getElementById("products-pagination").hidden = true;
+        updateInteractionState();
+        return;
+    }
+    const search = document.getElementById("product-search").value;
+    const stock = document.getElementById("stock-filter").value;
+    const expiration = document.getElementById("expiration-filter").value;
+    const displayedProducts = products.map(function (product) { return { product: product }; });
+    displayedProducts.sort(function (a, b) { return a.product.name.localeCompare(b.product.name, "en", { sensitivity: "base" }); });
+    const matchingProducts = displayedProducts.filter(function (entry) {
+        const product = entry.product;
+        return matchesProductFilters(product, search, stock, expiration);
+    });
+    const pageCount = Math.max(1, Math.ceil(matchingProducts.length / productPageSize));
+    productPage = Math.max(1, Math.min(productPage, pageCount));
+    document.getElementById("products-pagination").hidden = matchingProducts.length <= productPageSize;
+    document.getElementById("products-page-info").textContent = "Page " + productPage + " of " + pageCount;
+    document.getElementById("products-previous").disabled = productPage === 1;
+    document.getElementById("products-next").disabled = productPage === pageCount;
+    const start = (productPage - 1) * productPageSize;
+    matchingProducts.slice(start, start + productPageSize).forEach(function (entry) {
+        const product = entry.product;
+        const row = document.createElement("tr");
+        const imageCell = document.createElement("td");
+        imageCell.appendChild(createProductImage(product));
+        row.appendChild(imageCell);
+        [product.name, product.category || "N/A",
+            typeof product.price === "number" && Number.isFinite(product.price) ? priceFormatter.format(product.price) : "N/A",
+            product.quantity, product.effectiveLowStockThreshold,
+            formatExpirationDate(product.expirationDate)].forEach(function (value) {
+            const cell = document.createElement("td");
+            cell.textContent = value;
+            row.appendChild(cell);
+        });
+        [product.stockStatus, product.expirationStatus].forEach(function (status) {
+            const cell = document.createElement("td");
+            const badge = document.createElement("span");
+            badge.className = "status-badge status-" + status.toLowerCase().replaceAll(" ", "-");
+            badge.textContent = status;
+            cell.appendChild(badge);
+            row.appendChild(cell);
+        });
+        const actions = document.createElement("td");
+        const group = document.createElement("div");
+        group.className = "product-actions";
+        ["Edit", "Delete"].forEach(function (action) {
+            const button = document.createElement("button");
+            button.type = "button";
+            button.className = (action === "Edit" ? "btn-secondary" : "btn-danger") + " product-icon-button";
+            button.title = action;
+            const icon = document.createElement("img");
+            icon.src = "../../assets/icons/" + (action === "Edit" ? "pen-to-square-solid-full.svg" : "trash-can-solid-full.svg");
+            icon.alt = "";
+            icon.setAttribute("aria-hidden", "true");
+            button.appendChild(icon);
+            button.setAttribute("aria-label", action + " " + product.name);
+            button.addEventListener("click", function () {
+                if (action === "Edit") openProductEditor(product.id);
+                else deleteProduct(product.id);
+            });
+            group.appendChild(button);
+        });
+        actions.appendChild(group);
+        row.appendChild(actions);
+        body.appendChild(row);
+    });
+    if (!matchingProducts.length) {
+        const row = document.createElement("tr");
+        const cell = document.createElement("td");
+        cell.colSpan = 10;
+        cell.className = "empty-state";
+        cell.textContent = products.length ? "No matching products found." : "No products found.";
+        row.appendChild(cell);
+        body.appendChild(row);
+    }
+    updateInteractionState();
+}
+
