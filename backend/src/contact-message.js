@@ -36,3 +36,27 @@ function validateContactInput(input) {
     }
     return values;
 }
+
+async function createContactMessage(input) {
+    const values = validateContactInput(input);
+    return mutateJson("contactMessages", function (messages) {
+        const contactMessage = {
+            id: crypto.randomUUID(),
+            name: values.name,
+            email: values.email,
+            subject: values.subject,
+            message: values.message,
+            createdAt: new Date().toISOString()
+        };
+        return {
+            value: messages.concat(contactMessage),
+            result: contactMessage
+        };
+    });
+}
+
+module.exports = {
+    contactLimits,
+    createContactMessage,
+    validateContactInput
+};
