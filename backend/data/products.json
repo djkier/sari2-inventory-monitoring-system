@@ -59,7 +59,7 @@
     "categoryId": "d8d5f94e-8f49-4f49-9f10-bbd0dc664314",
     "catalogProductId": "e7a176ee-28ed-48d0-b771-1d5dc5d245c8"
   },
-   {
+  {
     "id": "10000000-0000-4000-8000-000000000005",
     "seedKey": "nestle-fresh-milk-1l",
     "name": "Nestle Fresh Milk 1L",
@@ -164,3 +164,19 @@
     "categoryId": "b765b9d4-9634-4f6c-827e-b5979020da77",
     "catalogProductId": "16766580-6af7-4c7d-8bd5-35ce493e4dea"
   },
+  {
+    "id": "10000000-0000-4000-8000-000000000012",
+    "seedKey": "scrubbing-sponge",
+    "name": "Scrubbing Sponge",
+    "category": "Household Supplies",
+    "price": 15,
+    "quantity": 11,
+    "lowStockThreshold": 4,
+    "expirationDate": "",
+    "imageUrl": "",
+    "seedSource": "sari2-demo-v1",
+    "storeId": "00000000-0000-4000-8000-000000000001",
+    "categoryId": "0e8488c2-59e9-4da3-b1a7-a09e54982941",
+    "catalogProductId": "af19e9b4-73ba-4885-9f3e-40f04effd208"
+  }
+]
