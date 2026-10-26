@@ -479,3 +479,148 @@ function renderProducts() {
     updateInteractionState();
 }
 
+function openProductEditor(productId = null) {
+    if (!initializeApp() || !productsLoaded || productMutationPending || categoryMutationPending) return;
+    const product = productId === null ? null : products.find(function (item) { return item.id === productId; });
+    if (productId !== null && !product) {
+        productFeedback.textContent = "This product is no longer available. Refresh and try again.";
+        return;
+    }
+    editingId = productId;
+    productForm.reset();
+    formError.textContent = "";
+    productFeedback.textContent = "";
+    productFields.forEach(function (field) {
+        field.removeAttribute("aria-invalid");
+        document.getElementById(field.id + "-error").textContent = "";
+    });
+    document.getElementById("editor-title").textContent = productId === null ? "Add Product" : "Edit Product";
+    productInput("quantity").disabled = productId !== null;
+    document.getElementById("quantity-group").hidden = productId !== null;
+    if (productId === null) {
+        productInput("quantity").value = 0;
+        productInput("lowStockThreshold").value = productSettings.defaultLowStockThreshold;
+    } else {
+        productFields.forEach(function (field) {
+            field.value = field.type === "file" ? "" : (product[field.name] ?? "");
+        });
+        productInput("lowStockThreshold").value = product.effectiveLowStockThreshold;
+    }
+    populateCategoryOptions(productId === null ? "" : product.categoryId);
+    populateCatalogOptions(productId === null ? "" : product.catalogProductId, productId === null);
+    syncCatalogFields();
+    editor.hidden = false;
+    addProductButton.textContent = productId === null ? "Add Product" : "Editing Product";
+    updateInteractionState();
+    (productInput("name").readOnly ? catalogSelect : productInput("name")).focus();
+}
+
+function closeProductEditor() {
+    editor.hidden = true;
+    productForm.reset();
+    productInput("name").readOnly = false;
+    productInput("imageUrl").readOnly = false;
+    imageStatus.textContent = "";
+    editingId = null;
+    addProductButton.textContent = "Add Product";
+    updateInteractionState();
+    addProductButton.focus();
+}
+
+productForm.addEventListener("submit", async function (event) {
+    event.preventDefault();
+    if (productsLoading || productMutationPending || categoryMutationPending) return;
+    formError.textContent = "";
+    const values = {};
+    productFields.forEach(function (field) {
+        values[field.name] = field.type === "file" ? "" : field.value.trim();
+    });
+    if (values.categoryId === "new") values.categoryId = "";
+    const imageFile = imageFileInput.files[0] || null;
+    const errors = validateProductValues(values, editingId !== null);
+    productFields.forEach(function (field) {
+        if (field.validity.badInput && !field.disabled) errors[field.name] = "Enter a valid value.";
+        document.getElementById(field.id + "-error").textContent = errors[field.name] || "";
+        field.setAttribute("aria-invalid", errors[field.name] ? "true" : "false");
+    });
+    const firstInvalid = productFields.find(function (field) { return errors[field.name]; });
+    if (firstInvalid) { firstInvalid.focus(); return; }
+    const selectedCatalog = findCatalogProduct(values.catalogProductId);
+    const editingProduct = getEditingProduct();
+    const productData = {
+        categoryId: values.categoryId, price: Number(values.price),
+        lowStockThreshold: Number(values.lowStockThreshold),
+        expirationDate: values.expirationDate
+    };
+    if (selectedCatalog) productData.catalogProductId = selectedCatalog.id;
+    if (!selectedCatalog || (editingProduct && editingProduct.catalogProductId === selectedCatalog.id)) {
+        productData.name = values.name;
+        productData.imageUrl = values.imageUrl;
+    }
+    if (editingId === null) productData.quantity = Number(values.quantity);
+
+    await productMutationGuard.run(async function () {
+        try {
+            const savedProduct = await Sari2Api.request(
+                editingId === null ? "products" : "products/" + encodeURIComponent(editingId),
+                { method: editingId === null ? "POST" : "PUT", body: productData }
+            );
+            let imageError = null;
+            if (imageFile) {
+                try {
+                    await Sari2Api.request(
+                        "catalog-products/" + encodeURIComponent(savedProduct.catalogProductId) + "/image",
+                        { method: "PUT", headers: { "Content-Type": imageFile.type }, body: imageFile }
+                    );
+                } catch (error) {
+                    imageError = error;
+                }
+            }
+            closeProductEditor();
+            const reloaded = await refreshProducts();
+            if (imageError) {
+                productFeedback.textContent = "Product saved, but the image upload failed: " +
+                    getApiErrorMessage(imageError, "try editing the product and uploading again.");
+                return;
+            }
+            productFeedback.textContent = reloaded
+                ? (imageFile ? "Product and shared catalog image saved." : "Product saved.")
+                : "Product saved, but the updated monitoring data could not be loaded.";
+        } catch (error) {
+            if (error instanceof Sari2Api.ApiError && error.details && typeof error.details === "object") {
+                Object.keys(error.details).forEach(function (fieldName) {
+                    const field = productInput(fieldName);
+                    const fieldError = productFieldError(fieldName);
+                    if (field && fieldError) {
+                        fieldError.textContent = error.details[fieldName];
+                        field.setAttribute("aria-invalid", "true");
+                    }
+                });
+            }
+            formError.textContent = getApiErrorMessage(error, "Unable to save the product. Try again.");
+        }
+    });
+});
+
+async function deleteProduct(productId) {
+    if (productsLoading || productMutationPending || categoryMutationPending) return;
+    const product = products.find(function (item) { return item.id === productId; });
+    if (!product) {
+        productFeedback.textContent = "This product is no longer available. Refresh and try again.";
+        return;
+    }
+    if (!window.confirm('Delete "' + product.name + '"? Stock movement history will be kept.')) return;
+
+    await productMutationGuard.run(async function () {
+        try {
+            await Sari2Api.request("products/" + encodeURIComponent(productId), { method: "DELETE" });
+            if (editingId === productId) closeProductEditor();
+            const reloaded = await refreshProducts();
+            productFeedback.textContent = reloaded
+                ? "Product deleted."
+                : "Product deleted, but the updated monitoring data could not be loaded.";
+        } catch (error) {
+            productFeedback.textContent = getApiErrorMessage(error, "Unable to delete the product. Try again.");
+        }
+    });
+}
