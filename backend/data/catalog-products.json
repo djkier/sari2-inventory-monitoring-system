@@ -1,0 +1,26 @@
+[
+  {
+    "id": "69f4bd01-0252-4df5-b226-a1528a020d1c",
+    "name": "Coca-Cola 1L",
+    "imageUrl": "",
+    "sourceProductId": "10000000-0000-4000-8000-000000000001"
+  },
+  {
+    "id": "04add543-d09f-4868-8577-43818896659d",
+    "name": "Lucky Me Pancit Canton 80g",
+    "imageUrl": "",
+    "sourceProductId": "10000000-0000-4000-8000-000000000002"
+  },
+  {
+    "id": "4a1f7a03-36fb-441d-ab32-f4d01b6ca04b",
+    "name": "Argentina Corned Beef 150g",
+    "imageUrl": "",
+    "sourceProductId": "10000000-0000-4000-8000-000000000003"
+  },
+  {
+    "id": "e7a176ee-28ed-48d0-b771-1d5dc5d245c8",
+    "name": "Gardenia Classic Bread 400g",
+    "imageUrl": "",
+    "sourceProductId": "10000000-0000-4000-8000-000000000004"
+  },
+  
