@@ -55,3 +55,52 @@ function assertUniqueName(categories, name, storeId, excludedId) {
         });
     }
 }
+
+async function listCategories(storeId) {
+    const categories = await readJson("categories");
+    return categories
+        .filter(function (category) { return category && category.storeId === storeId; })
+        .sort(function (left, right) {
+            return left.name.localeCompare(right.name, "en", { sensitivity: "base" });
+        });
+}
+
+async function getCategory(id, storeId) {
+    const categories = await readJson("categories");
+    const category = categories.find(function (item) {
+        return item && item.id === id && item.storeId === storeId;
+    });
+    if (!category) throw categoryNotFound(id);
+    return category;
+}
+
+async function createCategory(input, storeId) {
+    const values = validateCategoryInput(input);
+    return mutateJson("categories", function (categories) {
+        assertUniqueName(categories, values.name, storeId);
+        const category = { id: crypto.randomUUID(), storeId: storeId, name: values.name };
+        return { value: categories.concat(category), result: category };
+    });
+}
+
+async function updateCategory(id, input, storeId) {
+    const values = validateCategoryInput(input);
+    return mutateJsonStores(["categories", "products"], function (data) {
+        const index = findCategoryIndex(data.categories, id, storeId);
+        if (index === -1) throw categoryNotFound(id);
+        assertUniqueName(data.categories, values.name, storeId, id);
+
+        const category = { ...data.categories[index], name: values.name };
+        const categories = data.categories.slice();
+        categories[index] = category;
+        const products = data.products.map(function (product) {
+            return product && product.storeId === storeId && product.categoryId === id
+                ? { ...product, category: category.name }
+                : product;
+        });
+        return {
+            values: { categories: categories, products: products },
+            result: category
+        };
+    });
+}
