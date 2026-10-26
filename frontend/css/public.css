@@ -100,15 +100,78 @@
     color: var(--color-status-danger);
 }
 
-.signup-feedback.is-success {
-    background: #ecfdf5;
-    color: var(--color-primary-dark);
-}
-
 #signup-store-code-help {
     margin: 6px 0 0;
     color: var(--color-text-muted);
     font-size: 0.85rem;
+}
+
+.signup-success-dialog {
+    width: min(440px, calc(100% - 40px));
+    padding: 28px;
+    border: 1px solid var(--color-border);
+    border-radius: 12px;
+    background: var(--color-surface);
+    color: var(--color-text);
+    box-shadow: 0 20px 60px #17203333;
+}
+
+.signup-success-dialog::backdrop {
+    background: #17203380;
+}
+
+.signup-success-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 20px;
+}
+
+.signup-success-header h2 {
+    margin: 0;
+    color: var(--color-primary-dark);
+    font-size: 1.3rem;
+}
+
+.signup-success-close {
+    min-width: 36px;
+    min-height: 36px;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: var(--color-text-muted);
+    cursor: pointer;
+    font: inherit;
+    font-size: 1.75rem;
+    line-height: 1;
+}
+
+.signup-success-close:hover,
+.signup-success-close:focus-visible {
+    color: var(--color-text);
+}
+
+.signup-success-dialog > p {
+    margin: 16px 0 0;
+    color: var(--color-text-muted);
+}
+
+.signup-success-dialog .signup-success-store-code {
+    padding: 12px 14px;
+    border-radius: 8px;
+    background: #ecfdf5;
+    color: var(--color-primary-dark);
+    font-weight: 600;
+}
+
+.signup-success-actions {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 24px;
+}
+
+.signup-success-actions .btn-primary {
+    min-width: 100px;
 }
 
 .login-home {

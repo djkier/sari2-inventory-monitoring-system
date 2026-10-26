@@ -76,6 +76,19 @@
             </form>
             <a class="login-home" href="login.html">Return to Login</a>
         </section>
+        <dialog id="signup-success-dialog" class="signup-success-dialog" aria-labelledby="signup-success-title" aria-describedby="signup-success-message signup-success-store-code">
+            <div class="signup-success-header">
+                <h2 id="signup-success-title">Account Created Successfully</h2>
+                <form method="dialog">
+                    <button class="signup-success-close" type="submit" aria-label="Close success dialog">&times;</button>
+                </form>
+            </div>
+            <p id="signup-success-message">Your account has been created successfully.</p>
+            <p id="signup-success-store-code" class="signup-success-store-code" hidden></p>
+            <form class="signup-success-actions" method="dialog">
+                <button id="signup-success-ok" class="btn-primary" type="submit" autofocus>OK</button>
+            </form>
+        </dialog>
     </main>
     <footer class="site-footer">
         <div class="content-container footer-content">
