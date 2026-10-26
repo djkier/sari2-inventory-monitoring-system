@@ -129,3 +129,41 @@ async function writeBackupFile(fileName, value) {
         }
     }
 }
+
+async function backupInventory(products, movements) {
+    await fs.mkdir(backupDirectory, { recursive: true });
+    await writeBackupFile("products.json", products);
+    await writeBackupFile("stock-movements.json", movements);
+}
+
+async function migrateLegacyInventory(demoStoreId) {
+    const products = await readJson("products");
+    const movements = await readJson("stockMovements");
+    const stores = await readJson("stores");
+    const plan = planInventoryMigration(products, movements, stores, demoStoreId);
+    if (!plan.changed) return plan;
+
+    await backupInventory(products, movements);
+    return mutateJsonStores(["products", "stockMovements"], function (data) {
+        const currentPlan = planInventoryMigration(
+            data.products,
+            data.stockMovements,
+            stores,
+            demoStoreId
+        );
+        return {
+            values: {
+                products: currentPlan.products,
+                stockMovements: currentPlan.stockMovements
+            },
+            result: currentPlan
+        };
+    });
+}
+
+module.exports = {
+    backupDirectory,
+    backupInventory,
+    migrateLegacyInventory,
+    planInventoryMigration
+};
