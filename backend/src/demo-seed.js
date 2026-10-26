@@ -162,3 +162,57 @@ function validateSeedDefinitions(demoStoreId) {
         });
     });
 }
+
+function planDemoSeed(products, demoStoreId) {
+    validateSeedDefinitions(demoStoreId);
+    const byId = new Map(products.map(function (product) { return [product && product.id, product]; }));
+    const bySeedKey = new Map(products
+        .filter(function (product) { return product && product.seedSource === seedSource && product.seedKey; })
+        .map(function (product) { return [product.seedKey, product]; }));
+    const additions = [];
+
+    demoSeedProducts.forEach(function (seedProduct) {
+        const idMatch = byId.get(seedProduct.id);
+        if (idMatch) {
+            if (idMatch.storeId !== demoStoreId || idMatch.seedSource !== seedSource ||
+                idMatch.seedKey !== seedProduct.seedKey) {
+                throw seedConflict("A demo seed product ID is already used by another record.", {
+                    id: seedProduct.id
+                });
+            }
+            return;
+        }
+
+        const keyMatch = bySeedKey.get(seedProduct.seedKey);
+        if (keyMatch) {
+            if (keyMatch.storeId !== demoStoreId) {
+                throw seedConflict("Demo seed metadata is assigned to another store.", {
+                    seedKey: seedProduct.seedKey
+                });
+            }
+            return;
+        }
+
+        additions.push({ ...seedProduct, storeId: demoStoreId });
+    });
+
+    return {
+        changed: additions.length > 0,
+        addedCount: additions.length,
+        products: products.concat(additions)
+    };
+}
+
+function seedDemoInventory(demoStoreId) {
+    return mutateJson("products", function (products) {
+        const plan = planDemoSeed(products, demoStoreId);
+        return { value: plan.products, result: plan };
+    });
+}
+
+module.exports = {
+    demoSeedProducts,
+    planDemoSeed,
+    seedDemoInventory,
+    seedSource
+};
