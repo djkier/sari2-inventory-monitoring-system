@@ -23,7 +23,7 @@
     "imageUrl": "",
     "sourceProductId": "10000000-0000-4000-8000-000000000004"
   },
-    {
+  {
     "id": "a0dcac97-327a-4343-ad26-8dd160794252",
     "name": "Nestle Fresh Milk 1L",
     "imageUrl": "",
@@ -47,3 +47,28 @@
     "imageUrl": "",
     "sourceProductId": "10000000-0000-4000-8000-000000000008"
   },
+  {
+    "id": "21cc8b39-bb2a-4b34-b45d-a7a07c6412c2",
+    "name": "Pandesal Pack of 6",
+    "imageUrl": "",
+    "sourceProductId": "10000000-0000-4000-8000-000000000009"
+  },
+  {
+    "id": "da47eb77-40a4-4bb1-af93-8c50b0c07a33",
+    "name": "Nescafe 3-in-1 Original 27.5g",
+    "imageUrl": "",
+    "sourceProductId": "10000000-0000-4000-8000-000000000010"
+  },
+  {
+    "id": "16766580-6af7-4c7d-8bd5-35ce493e4dea",
+    "name": "Plastic Sando Bags Pack of 100",
+    "imageUrl": "",
+    "sourceProductId": "10000000-0000-4000-8000-000000000011"
+  },
+  {
+    "id": "af19e9b4-73ba-4885-9f3e-40f04effd208",
+    "name": "Scrubbing Sponge",
+    "imageUrl": "",
+    "sourceProductId": "10000000-0000-4000-8000-000000000012"
+  }
+]
