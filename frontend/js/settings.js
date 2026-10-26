@@ -2,6 +2,13 @@ const settingsForm = document.getElementById("settings-form");
 const settingsFields = Array.from(settingsForm.querySelectorAll("input"));
 const settingsFieldsets = Array.from(settingsForm.querySelectorAll("fieldset"));
 const settingsSubmit = settingsForm.querySelector('button[type="submit"]');
+const storeNameInput = document.getElementById("settings-store");
+const ownerNameInput = document.getElementById("settings-owner");
+const staffNameGroup = document.getElementById("settings-staff-group");
+const staffNameInput = document.getElementById("settings-staff");
+const thresholdInput = document.getElementById("settings-threshold");
+const warningInput = document.getElementById("settings-warning");
+const successMessage = document.getElementById("settings-success-message");
 let settingsContext = null;
 
 function setSettingsPending(isPending, label) {
@@ -18,9 +25,19 @@ function setFieldError(field, message) {
 
 function renderSettingsForm(settings) {
     settingsFields.forEach(function (field) {
-        field.value = settings[field.name];
+        field.value = settings[field.name] === undefined ? "" : settings[field.name];
         setFieldError(field, "");
     });
+}
+
+function applyRolePermissions(identity) {
+    const isOwner = identity.user.role === "Store Owner";
+    storeNameInput.readOnly = !isOwner;
+    ownerNameInput.readOnly = !isOwner;
+    thresholdInput.readOnly = !isOwner;
+    warningInput.readOnly = !isOwner;
+    staffNameGroup.hidden = isOwner;
+    staffNameInput.disabled = isOwner;
 }
 
 async function loadSettingsForm(forceRefresh = false) {
@@ -35,6 +52,7 @@ async function loadSettingsForm(forceRefresh = false) {
                 "Unable to load settings. Check the server and try again.";
             return;
         }
+        applyRolePermissions(settingsContext.identity);
         renderSettingsForm(settingsContext.settings);
     } catch (error) {
         document.getElementById("settings-error").textContent =
@@ -67,7 +85,12 @@ settingsForm.addEventListener("submit", async function (event) {
     let firstInvalid = null;
     document.getElementById("settings-error").textContent = "";
     document.getElementById("settings-feedback").textContent = "";
-    settingsFields.forEach(function (field) {
+    settingsFields.forEach(function (field) { setFieldError(field, ""); });
+    const isOwner = settingsContext.identity.user.role === "Store Owner";
+    const editableFields = isOwner
+        ? [storeNameInput, ownerNameInput, thresholdInput, warningInput]
+        : [staffNameInput];
+    editableFields.forEach(function (field) {
         const value = field.value.trim();
         let error = "";
         if (field.type === "number") {
@@ -77,7 +100,9 @@ settingsForm.addEventListener("submit", async function (event) {
             }
             settings[field.name] = number;
         } else {
-            if (field.required && !value) error = "Enter a store name.";
+            if (!value) {
+                error = field === storeNameInput ? "Enter a store name." : "Enter an account name.";
+            }
             settings[field.name] = value;
         }
         setFieldError(field, error);
@@ -90,8 +115,20 @@ settingsForm.addEventListener("submit", async function (event) {
             return Sari2Api.request("/settings", { method: "PUT", body: settings });
         });
         renderSettingsForm(savedSettings);
-        settingsContext = { identity: settingsContext.identity, settings: savedSettings };
+        const accountName = isOwner ? savedSettings.ownerName : savedSettings.staffName;
+        const updatedIdentity = {
+            ...settingsContext.identity,
+            user: { ...settingsContext.identity.user, name: accountName },
+            store: {
+                ...settingsContext.identity.store,
+                name: isOwner ? savedSettings.storeName : settingsContext.identity.store.name
+            }
+        };
+        settingsContext = { identity: updatedIdentity, settings: savedSettings };
         applyConfirmedAppSettings(settingsContext.identity, savedSettings);
+        successMessage.textContent = isOwner
+            ? "Your store information and inventory preferences have been saved successfully."
+            : "Your account name has been saved successfully.";
         document.getElementById("settings-success-dialog").showModal();
     } catch (error) {
         const firstServerField = applyServerFieldErrors(error.details);
