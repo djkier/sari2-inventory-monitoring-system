@@ -6,8 +6,7 @@
     <title>Products | Sari2</title>
     <link rel="stylesheet" href="../../css/style.css">
     <link rel="stylesheet" href="../../css/app.css">
-    <script src="../../js/stock-items.js" defer></script>
-    <script src="../../js/storage.js" defer></script>
+    <script src="../../js/api.js" defer></script>
     <script src="../../js/auth.js" defer></script>
     <script src="../../js/inventory.js" defer></script>
     <script src="../../js/app.js" defer></script>
@@ -53,13 +52,20 @@
                     <form id="product-form" novalidate>
                         <div class="product-form-grid">
                         <div class="form-group">
+                            <label for="product-catalogProductId">Shared Catalog Product</label>
+                            <select id="product-catalogProductId" name="catalogProductId" aria-describedby="product-catalog-help product-catalogProductId-error"></select>
+                            <p id="product-catalog-help" class="product-form-help">Reuse an existing catalog item, or create a new one for this product.</p>
+                            <p class="field-error" id="product-catalogProductId-error"></p>
+                        </div>
+                        <div class="form-group">
                             <label for="product-name">Product Name</label>
                             <input id="product-name" name="name" type="text" required aria-describedby="product-name-error">
                             <p class="field-error" id="product-name-error"></p>
                         </div>
                         <div class="form-group">
                             <label for="product-category">Category</label>
-                            <select id="product-category" name="category" required aria-describedby="product-category-error"></select>
+                            <select id="product-category" name="categoryId" required aria-describedby="product-category-error"></select>
+                            <button id="manage-categories" class="btn-secondary" type="button">Manage Categories</button>
                             <p class="field-error" id="product-category-error"></p>
                         </div>
                         <div class="form-group">
@@ -87,6 +93,13 @@
                             <input id="product-imageUrl" name="imageUrl" type="text" placeholder="https://example.com/product.jpg" aria-describedby="product-imageUrl-error">
                             <p class="field-error" id="product-imageUrl-error"></p>
                         </div>
+                        <div class="form-group">
+                            <label for="product-imageFile">Upload Image (optional)</label>
+                            <input id="product-imageFile" name="imageFile" type="file" accept="image/jpeg,image/png,image/webp,image/gif" aria-describedby="product-image-help product-imageFile-error">
+                            <p id="product-image-help" class="product-form-help">JPEG, PNG, WebP, or GIF up to 5 MB. Uploading replaces the shared catalog image.</p>
+                            <p id="product-image-status" class="product-form-help" aria-live="polite"></p>
+                            <p class="field-error" id="product-imageFile-error"></p>
+                        </div>
                         </div>
                         <p id="product-form-error" class="field-error" role="alert"></p>
                         <div class="product-actions">
@@ -97,8 +110,12 @@
                 </section>
 
                 <dialog id="category-dialog" class="category-dialog" aria-labelledby="category-dialog-title">
-                    <h2 id="category-dialog-title">Add New Category</h2>
+                    <h2 id="category-dialog-title">Manage Categories</h2>
                     <form id="category-form" novalidate>
+                        <div class="form-group">
+                            <label for="category-record">Category to manage</label>
+                            <select id="category-record" aria-describedby="category-name-error"></select>
+                        </div>
                         <div class="form-group">
                             <label for="category-name">Category Name</label>
                             <input id="category-name" type="text" required aria-describedby="category-name-error">
@@ -106,7 +123,8 @@
                         </div>
                         <div class="product-actions">
                             <button id="cancel-category" class="btn-secondary" type="button">Cancel</button>
-                            <button class="btn-primary" type="submit">Add Category</button>
+                            <button id="delete-category" class="btn-danger" type="button" hidden>Delete Category</button>
+                            <button id="save-category" class="btn-primary" type="submit">Add Category</button>
                         </div>
                     </form>
                 </dialog>
