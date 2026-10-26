@@ -182,6 +182,7 @@ async function getProduct(id, storeId) {
     if (!product) throw notFound(id);
     return hydrateProduct(product, catalogProducts);
 }
+
 async function createProduct(input, storeId) {
     const values = validateProductInput(input, { requireQuantity: true });
     const productId = crypto.randomUUID();
@@ -271,3 +272,23 @@ async function updateProduct(id, input, storeId) {
         };
     });
 }
+
+async function deleteProduct(id, storeId) {
+    return mutateJson("products", async function (products) {
+        const index = findProductIndex(products, id, storeId);
+        if (index === -1) throw notFound(id);
+        const deletedProduct = hydrateProduct(products[index], await readJson("catalogProducts"));
+        const updatedProducts = products.slice();
+        updatedProducts.splice(index, 1);
+        return { value: updatedProducts, result: deletedProduct };
+    });
+}
+
+module.exports = {
+    createProduct,
+    deleteProduct,
+    getProduct,
+    listProducts,
+    updateProduct,
+    validateProductInput
+};
