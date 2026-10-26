@@ -15,6 +15,15 @@
 .settings-dialog h2, .category-dialog h2 { margin: 0 0 12px; font-size: 1.3rem; color: var(--color-primary-dark); }
 .settings-dialog p { color: var(--color-text-muted); margin: 0 0 24px; }
 .settings-dialog form { display: flex; justify-content: flex-end; }
+.category-settings { max-width: 800px; margin-top: 18px; padding: 18px 24px; }
+.category-settings-header { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 16px; }
+.category-settings-header h2 { margin: 0; font-size: 1.2rem; }
+.category-settings-description { margin: 10px 0 18px; color: var(--color-text-muted); font-size: 0.9rem; }
+.category-settings #category-feedback:not(:empty) { margin: 0 0 14px; }
+.category-settings .table-scroll { margin-top: 8px; }
+.category-settings-table { min-width: 420px; }
+.category-settings-table th:last-child, .category-settings-table td:last-child { width: 190px; text-align: right; }
+.category-settings-actions { display: flex; justify-content: flex-end; flex-wrap: wrap; gap: 8px; }
 
 .expiration-filter { max-width: 300px; }
 .expiration-table { min-width: 560px; }
@@ -43,7 +52,6 @@
 
 .products-heading { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 16px; }
 .products-heading .btn-primary:disabled { background: var(--color-border); border-color: var(--color-border); color: var(--color-text-muted); cursor: not-allowed; }
-.category-dialog .product-actions { justify-content: flex-end; }
 .product-editor { margin: 18px 0; padding: 18px 24px; }
 .product-editor h2 { margin-top: 0; }
 .product-form-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 24px; }
