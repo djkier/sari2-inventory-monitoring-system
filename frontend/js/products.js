@@ -18,6 +18,7 @@ let editingId = null;
 let productsLoaded = false;
 let productsLoading = false;
 let productsLoadError = "";
+let productsLoadFailed = false;
 let productMutationPending = false;
 const productPageSize = 10;
 let productPage = 1;
@@ -148,7 +149,7 @@ function validateProductValues(values, isEditing) {
 }
 
 function getApiErrorMessage(error, fallback) {
-    return error instanceof Sari2Api.ApiError ? error.message : fallback;
+    return Sari2Api.getInlineErrorMessage(error, fallback);
 }
 
 function updateInteractionState() {
@@ -165,6 +166,7 @@ function updateInteractionState() {
 
 async function refreshProducts(forceRefresh = false) {
     productsLoadError = "";
+    productsLoadFailed = false;
     document.getElementById("products-warning").textContent = "Loading products...";
 
     return productLoadGuard.run(async function () {
@@ -224,6 +226,7 @@ async function refreshProducts(forceRefresh = false) {
             };
             productsLoaded = true;
             productsLoadError = "";
+            productsLoadFailed = false;
             document.getElementById("products-warning").textContent = monitoring.counts.invalidDate > 0
                 ? "Some products have invalid expiration dates and are excluded from expiration monitoring."
                 : "";
@@ -235,6 +238,7 @@ async function refreshProducts(forceRefresh = false) {
             populateCategoryOptions();
             productSettings = null;
             productsLoaded = false;
+            productsLoadFailed = true;
             productsLoadError = getApiErrorMessage(error, "Unable to load products.");
             document.getElementById("products-warning").textContent = productsLoadError;
             return false;
@@ -273,7 +277,7 @@ function createProductImage(product) {
 function renderProducts() {
     const body = document.getElementById("products-list");
     body.replaceChildren();
-    if (productsLoading || productsLoadError) {
+    if (productsLoading || productsLoadFailed) {
         const row = document.createElement("tr");
         const cell = document.createElement("td");
         cell.colSpan = 10;
@@ -458,8 +462,13 @@ productForm.addEventListener("submit", async function (event) {
             closeProductEditor();
             const reloaded = await refreshProducts();
             if (imageError) {
-                productFeedback.textContent = "Product saved, but the image upload failed: " +
-                    getApiErrorMessage(imageError, "try editing the product and uploading again.");
+                const imageMessage = getApiErrorMessage(
+                    imageError,
+                    "Try editing the product and uploading again."
+                );
+                productFeedback.textContent = imageMessage
+                    ? "Product saved, but the image upload failed: " + imageMessage
+                    : "Product saved, but the image upload could not be completed.";
                 return;
             }
             productFeedback.textContent = reloaded

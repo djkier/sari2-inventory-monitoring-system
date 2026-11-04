@@ -65,14 +65,17 @@ async function loadSettingsForm(forceRefresh = false) {
         settingsContext = forceRefresh ? await initializeApp(true) : await appReady;
         if (!settingsContext) {
             document.getElementById("settings-error").textContent =
-                "Unable to load settings. Check the server and try again.";
+                Sari2Api.getInlineErrorMessage(
+                    null,
+                    "Unable to load settings. Check the server and try again."
+                );
             return;
         }
         applyRolePermissions(settingsContext.identity);
         renderSettingsForm(settingsContext.settings);
     } catch (error) {
         document.getElementById("settings-error").textContent =
-            error.message || "Unable to load settings. Check the server and try again.";
+            Sari2Api.getInlineErrorMessage(error, "Unable to load settings. Check the server and try again.");
     } finally {
         setSettingsPending(false, "");
     }
@@ -164,7 +167,7 @@ settingsForm.addEventListener("submit", async function (event) {
     } catch (error) {
         const firstServerField = applyServerFieldErrors(error.details);
         document.getElementById("settings-error").textContent =
-            error.message || "Unable to save settings. Check the server and try again.";
+            Sari2Api.getInlineErrorMessage(error, "Unable to save settings. Check the server and try again.");
         if (firstServerField) firstServerField.focus();
     }
 });
@@ -231,7 +234,10 @@ async function loadCategories() {
         } catch (error) {
             categories = [];
             categoriesLoaded = false;
-            setCategoryFeedback(error && error.message ? error.message : "Unable to load categories. Try again.", true);
+            setCategoryFeedback(
+                Sari2Api.getInlineErrorMessage(error, "Unable to load categories. Try again."),
+                true
+            );
         }
     });
 }
@@ -309,9 +315,9 @@ categoryForm.addEventListener("submit", async function (event) {
         } catch (error) {
             const serverMessage = error && error.details && typeof error.details.name === "string"
                 ? error.details.name
-                : (error && error.message ? error.message : "Unable to save the category. Try again.");
+                : Sari2Api.getInlineErrorMessage(error, "Unable to save the category. Try again.");
             categoryNameError.textContent = serverMessage;
-            categoryNameInput.setAttribute("aria-invalid", "true");
+            categoryNameInput.setAttribute("aria-invalid", serverMessage ? "true" : "false");
         }
     });
     if (saveSucceeded) {
@@ -332,7 +338,10 @@ async function deleteCategory(category) {
             setCategoryFeedback("Category deleted.", false);
             deleteSucceeded = true;
         } catch (error) {
-            setCategoryFeedback(error && error.message ? error.message : "Unable to delete the category. Try again.", true);
+            setCategoryFeedback(
+                Sari2Api.getInlineErrorMessage(error, "Unable to delete the category. Try again."),
+                true
+            );
         }
     });
     if (deleteSucceeded) addCategoryButton.focus();

@@ -2,6 +2,9 @@
     "use strict";
 
     const apiPrefix = "/api";
+    const connectionToastId = "server-connection-toast";
+    let connectionUnavailable = false;
+    let connectionToastDismissed = false;
 
     class ApiError extends Error {
         constructor(code, message, options = {}) {
@@ -12,6 +15,72 @@
             if (options.details !== undefined) this.details = options.details;
             if (options.cause !== undefined) this.cause = options.cause;
         }
+    }
+
+    function removeConnectionToast() {
+        if (typeof document === "undefined") return;
+        const toast = document.getElementById(connectionToastId);
+        if (toast) toast.remove();
+    }
+
+    function showConnectionToast() {
+        if (typeof document === "undefined" || connectionToastDismissed ||
+            document.getElementById(connectionToastId)) return;
+
+        const toast = document.createElement("div");
+        const icon = document.createElement("span");
+        const message = document.createElement("div");
+        const title = document.createElement("strong");
+        const detail = document.createElement("span");
+        const closeButton = document.createElement("button");
+
+        toast.id = connectionToastId;
+        toast.className = "server-connection-toast";
+        toast.setAttribute("role", "alert");
+        toast.setAttribute("aria-live", "assertive");
+        toast.setAttribute("aria-atomic", "true");
+        icon.className = "server-connection-toast-icon";
+        icon.setAttribute("aria-hidden", "true");
+        icon.textContent = "!";
+        message.className = "server-connection-toast-message";
+        title.textContent = "Unable to connect to the Sari2 server.";
+        detail.textContent = "Check that it is running and try again.";
+        closeButton.className = "server-connection-toast-close";
+        closeButton.type = "button";
+        closeButton.setAttribute("aria-label", "Dismiss server connection error");
+        closeButton.textContent = "\u00d7";
+        closeButton.addEventListener("click", function () {
+            connectionToastDismissed = true;
+            removeConnectionToast();
+        });
+
+        message.append(title, detail);
+        toast.append(icon, message, closeButton);
+        document.body.appendChild(toast);
+    }
+
+    function reportConnectionFailure() {
+        if (!connectionUnavailable) {
+            connectionUnavailable = true;
+            connectionToastDismissed = false;
+        }
+        showConnectionToast();
+    }
+
+    function reportConnectionRecovery() {
+        if (!connectionUnavailable) return;
+        connectionUnavailable = false;
+        connectionToastDismissed = false;
+        removeConnectionToast();
+    }
+
+    function isNetworkError(error) {
+        return Boolean(error && error.code === "NETWORK_ERROR");
+    }
+
+    function getInlineErrorMessage(error, fallback) {
+        if (isNetworkError(error) || connectionUnavailable) return "";
+        return error && typeof error.message === "string" && error.message ? error.message : fallback;
     }
 
     function buildApiUrl(path) {
@@ -53,12 +122,14 @@
                 credentials: "include"
             });
         } catch (error) {
+            reportConnectionFailure();
             throw new ApiError(
                 "NETWORK_ERROR",
                 "Unable to connect to the Sari2 server. Check that it is running and try again.",
                 { cause: error }
             );
         }
+        reportConnectionRecovery();
 
         let payload;
         try {
@@ -126,6 +197,9 @@
     const api = Object.freeze({
         ApiError: ApiError,
         createRequestGuard: createRequestGuard,
+        getInlineErrorMessage: getInlineErrorMessage,
+        isConnectionUnavailable: function () { return connectionUnavailable; },
+        isNetworkError: isNetworkError,
         request: request
     });
 
