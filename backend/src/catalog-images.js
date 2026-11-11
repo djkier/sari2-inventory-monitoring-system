@@ -76,7 +76,9 @@ function markOriginalUploadDeleted(relativePath) {
         return Promise.reject(error);
     }
     const originalPath = path.resolve(originalUploadsDirectory, ...normalized.split("/"));
-    if (path.relative(originalUploadsDirectory, originalPath).startsWith("..")) {
+    const originalRelativePath = path.relative(originalUploadsDirectory, originalPath);
+    if (originalRelativePath === ".." || originalRelativePath.startsWith(".." + path.sep) ||
+        path.isAbsolute(originalRelativePath)) {
         const error = new Error("Runtime upload path escapes the uploads directory.");
         error.code = "INVALID_UPLOAD_PATH";
         return Promise.reject(error);
