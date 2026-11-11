@@ -49,7 +49,10 @@ function initializeApp(forceRefresh = false) {
             return { identity: identity, settings: settings };
         })
         .catch(function (error) {
-            feedback.textContent = error.message || "Unable to verify your login. Check the server and try again.";
+            feedback.textContent = Sari2Api.getInlineErrorMessage(
+                error,
+                "Unable to verify your login. Check the server and try again."
+            );
             shell.hidden = false;
             return null;
         })
@@ -71,7 +74,7 @@ logoutButton.addEventListener("click", async function () {
         document.getElementById("app-shell").hidden = true;
     } catch (error) {
         document.getElementById("app-feedback").textContent =
-            error.message || "Unable to log out. Check the server and try again.";
+            Sari2Api.getInlineErrorMessage(error, "Unable to log out. Check the server and try again.");
         logoutButton.disabled = false;
         logoutPending = false;
     }

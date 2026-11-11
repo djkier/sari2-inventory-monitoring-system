@@ -10,6 +10,7 @@ let stockMovements = [];
 let stockLoaded = false;
 let stockLoading = false;
 let stockLoadError = "";
+let stockLoadFailed = false;
 let stockMutationPending = false;
 const historyPageSize = 10;
 let historyPage = 1;
@@ -25,11 +26,11 @@ const stockMutationGuard = Sari2Api.createRequestGuard(function (pending) {
 });
 
 function getStockApiErrorMessage(error, fallback) {
-    return error instanceof Sari2Api.ApiError ? error.message : fallback;
+    return Sari2Api.getInlineErrorMessage(error, fallback);
 }
 
 function updateStockInteractionState() {
-    stockFields.disabled = stockLoading || stockMutationPending || !stockLoaded || Boolean(stockLoadError) || !stockProducts.length;
+    stockFields.disabled = stockLoading || stockMutationPending || !stockLoaded || stockLoadFailed || !stockProducts.length;
     stockForm.setAttribute("aria-busy", stockMutationPending ? "true" : "false");
     document.getElementById("stock-previous").disabled = stockLoading || stockMutationPending || historyPage === 1;
     const pageCount = Math.max(1, Math.ceil(stockMovements.length / historyPageSize));
@@ -67,7 +68,7 @@ function renderStockHistory() {
     const body = document.getElementById("stock-history");
     body.replaceChildren();
 
-    if (stockLoading || stockLoadError) {
+    if (stockLoading || stockLoadFailed) {
         const row = document.createElement("tr");
         const cell = document.createElement("td");
         cell.colSpan = 5;
@@ -143,6 +144,7 @@ async function requestStockData() {
 async function refreshStock() {
     if (!initializeApp()) return false;
     stockLoadError = "";
+    stockLoadFailed = false;
     document.getElementById("stock-warning").textContent = "Loading inventory and movement history...";
 
     return stockLoadGuard.run(async function () {
@@ -152,12 +154,14 @@ async function refreshStock() {
             stockMovements = data.movements;
             stockLoaded = true;
             stockLoadError = "";
+            stockLoadFailed = false;
             document.getElementById("stock-warning").textContent = "";
             return true;
         } catch (error) {
             stockProducts = [];
             stockMovements = [];
             stockLoaded = false;
+            stockLoadFailed = true;
             stockLoadError = getStockApiErrorMessage(error, "Unable to load inventory and movement history.");
             document.getElementById("stock-warning").textContent = stockLoadError;
             return false;
@@ -213,9 +217,10 @@ stockForm.addEventListener("submit", async function (event) {
                 stockProducts = data.products;
                 stockMovements = data.movements;
             } catch (reloadError) {
-                document.getElementById("stock-warning").textContent =
-                    "The movement was recorded, but the latest inventory could not be reloaded. " +
-                    getStockApiErrorMessage(reloadError, "Refresh the page to try again.");
+                const reloadMessage = getStockApiErrorMessage(reloadError, "Refresh the page to try again.");
+                document.getElementById("stock-warning").textContent = reloadMessage
+                    ? "The movement was recorded, but the latest inventory could not be reloaded. " + reloadMessage
+                    : "The movement was recorded, but the latest inventory could not be reloaded.";
             }
             renderStockPage();
             stockFeedback.textContent = (result.movement.type === "stock-in" ? "Stock In" : "Stock Out") +

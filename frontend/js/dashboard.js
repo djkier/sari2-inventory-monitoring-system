@@ -74,8 +74,10 @@ async function loadDashboard(forceRefresh = false) {
         dashboardData = null;
         dashboardLoaded = false;
         renderDashboardUnavailable("Dashboard data is unavailable.");
-        dashboardFeedback.textContent = error.message ||
-            "Unable to load dashboard data. Check the server and try again.";
+        dashboardFeedback.textContent = Sari2Api.getInlineErrorMessage(
+            error,
+            "Unable to load dashboard data. Check the server and try again."
+        );
     }
 }
 
