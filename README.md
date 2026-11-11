@@ -50,7 +50,7 @@ The application includes a public information site, account registration and log
 
    Express serves both the API and the frontend. The backend must remain running while the application is in use. Do not open the HTML files directly from the filesystem.
 
-3. Open `http://localhost:3000/html/frontfacing/login.html` to log in. External testers can select either demo account on the login page or enter these credentials manually:
+3. Open `http://localhost:3000/html/frontfacing/login.html` or click "Go to Login" button to log in. External testers can select either demo account on the login page or enter these credentials manually:
 
    | Role | Username | Password |
    | --- | --- | --- |
@@ -220,3 +220,12 @@ The next startup recreates runtime storage from `backend/data/` and `backend/upl
 - Contact messages are saved locally but are not emailed and do not have an administrative inbox in the application.
 - Sari2 does not provide point-of-sale, payment processing, accounting, supplier management, delivery management, or multi-branch management features.
 - The project does not include an automated test command in `package.json`.
+
+
+## Web System Technology H3101 | Group 29
+
+- Don Justine Fontanilla
+- Kelsy Martinez
+- Kennan Atienza
+- John Raymund Apostol
+- Kirk Martin Sevillano
