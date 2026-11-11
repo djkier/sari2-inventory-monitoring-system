@@ -1,8 +1,10 @@
 const path = require("node:path");
 const crypto = require("node:crypto");
+const fsConstants = require("node:fs").constants;
 const fs = require("node:fs/promises");
+const { originalDataDirectory, runtimeDataDirectory } = require("./storage-paths");
 
-const dataDirectory = path.resolve(__dirname, "../data");
+const dataDirectory = runtimeDataDirectory;
 const dataFiles = Object.freeze({
     products: {
         fileName: "products.json",
@@ -67,6 +69,28 @@ function getDataPath(key) {
     return path.join(dataDirectory, getDefinition(key).fileName);
 }
 
+function getOriginalDataPath(key) {
+    return path.join(originalDataDirectory, getDefinition(key).fileName);
+}
+
+async function initializeDataFile(key) {
+    const definition = getDefinition(key);
+    const sourcePath = getOriginalDataPath(key);
+    const runtimePath = getDataPath(key);
+    try {
+        await fs.copyFile(sourcePath, runtimePath, fsConstants.COPYFILE_EXCL);
+    } catch (error) {
+        if (error.code === "EEXIST") return;
+        if (error.code === "ENOENT") {
+            const missingError = new Error("Original data file is missing: " + definition.fileName);
+            missingError.code = "ORIGINAL_DATA_FILE_MISSING";
+            missingError.cause = error;
+            throw missingError;
+        }
+        throw error;
+    }
+}
+
 async function writeJson(key, value) {
     const definition = getDefinition(key);
     if (!definition.isValid(value)) {
@@ -99,7 +123,7 @@ async function readJson(key) {
         raw = await fs.readFile(getDataPath(key), "utf8");
     } catch (error) {
         if (error.code !== "ENOENT") throw error;
-        await writeJson(key, definition.initialValue);
+        await initializeDataFile(key);
         raw = await fs.readFile(getDataPath(key), "utf8");
     }
 
@@ -122,6 +146,7 @@ async function readJson(key) {
 async function initializeStorage() {
     await fs.mkdir(dataDirectory, { recursive: true });
     for (const key of Object.keys(dataFiles)) {
+        await initializeDataFile(key);
         await readJson(key);
     }
 }
@@ -206,6 +231,7 @@ function mutateJson(key, mutator) {
 
 module.exports = {
     dataDirectory,
+    getDataPath,
     initializeStorage,
     mutateJson,
     mutateJsonStores,

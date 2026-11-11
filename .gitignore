@@ -1,5 +1,8 @@
 node_modules/
 
+# Local runtime data and uploaded files
+/backend/temp_data/
+
 # Runtime storage artifacts
 backend/data/backups/
 backend/data/*.tmp
@@ -21,3 +24,7 @@ coverage/
 .DS_Store
 Thumbs.db
 Desktop.ini
+
+temp_data/
+temp_data/*
+
