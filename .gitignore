@@ -24,3 +24,7 @@ coverage/
 .DS_Store
 Thumbs.db
 Desktop.ini
+
+temp_data/
+temp_data/*
+
