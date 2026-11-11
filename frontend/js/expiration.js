@@ -6,6 +6,7 @@ let expirationWarningDays = 0;
 let expirationInvalidCount = 0;
 let expirationLoading = false;
 let expirationLoadError = "";
+let expirationLoadFailed = false;
 
 const expirationLoadRequest = Sari2Api.createRequestGuard(function (pending) {
     expirationLoading = pending;
@@ -22,6 +23,7 @@ function initializeExpirationFilterFromUrl() {
 
 async function loadExpiration(forceRefresh = false) {
     expirationLoadError = "";
+    expirationLoadFailed = false;
     return expirationLoadRequest.run(async function () {
         try {
             const context = forceRefresh ? await initializeApp(true) : await appReady;
@@ -42,13 +44,13 @@ async function loadExpiration(forceRefresh = false) {
             expirationWarningDays = monitoring.expirationWarningDays;
             expirationInvalidCount = monitoring.counts.invalidDate;
             expirationLoadError = "";
+            expirationLoadFailed = false;
             return true;
         } catch (error) {
             expirationProducts = [];
             expirationInvalidCount = 0;
-            expirationLoadError = error instanceof Sari2Api.ApiError
-                ? error.message
-                : "Unable to load expiration monitoring.";
+            expirationLoadFailed = true;
+            expirationLoadError = Sari2Api.getInlineErrorMessage(error, "Unable to load expiration monitoring.");
             return false;
         }
     });
@@ -62,7 +64,7 @@ function renderExpiration() {
             ? "Some products have invalid expiration dates. Review their dates on the Products page."
             : "");
 
-    if (expirationLoading || expirationLoadError) {
+    if (expirationLoading || expirationLoadFailed) {
         document.getElementById("expiration-window").textContent = "";
         document.getElementById("expiration-count").textContent = "";
         document.getElementById("expiration-pagination").hidden = true;

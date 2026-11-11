@@ -122,7 +122,7 @@ if (loginForm) {
             passwordInput.value = "";
             window.location.assign(dashboardUrl);
         } catch (error) {
-            feedback.textContent = error.message || "Unable to log in. Try again.";
+            feedback.textContent = Sari2Api.getInlineErrorMessage(error, "Unable to log in. Try again.");
             passwordInput.focus();
         }
     });
@@ -280,7 +280,7 @@ if (signupForm) {
             successDialog.showModal();
         } catch (error) {
             const firstServerField = applyServerFieldErrors(error.details);
-            setFeedback(error.message || "Unable to create the account. Try again.", "error");
+            setFeedback(Sari2Api.getInlineErrorMessage(error, "Unable to create the account. Try again."), "error");
             if (firstServerField) firstServerField.focus();
         }
     });

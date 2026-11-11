@@ -68,7 +68,10 @@ contactForm.addEventListener("submit", async function (event) {
         setContactFeedback("Your message was sent successfully. Thank you for contacting Sari2.", false);
     } catch (error) {
         showServerFieldErrors(error.details);
-        setContactFeedback(error.message || "Unable to send your message. Please try again.", true);
+        setContactFeedback(
+            Sari2Api.getInlineErrorMessage(error, "Unable to send your message. Please try again."),
+            true
+        );
     }
 });
 

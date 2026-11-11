@@ -2,73 +2,109 @@
   {
     "id": "69f4bd01-0252-4df5-b226-a1528a020d1c",
     "name": "Coca-Cola 1L",
-    "imageUrl": "",
-    "sourceProductId": "10000000-0000-4000-8000-000000000001"
+    "imageUrl": "/uploads/catalog/ceee8bce-e96d-44a7-ace2-a49a4f69a0b8.jpg",
+    "sourceProductId": "10000000-0000-4000-8000-000000000001",
+    "imageFileName": "ceee8bce-e96d-44a7-ace2-a49a4f69a0b8.jpg",
+    "imageMimeType": "image/jpeg",
+    "imageSize": 35150
   },
   {
     "id": "04add543-d09f-4868-8577-43818896659d",
     "name": "Lucky Me Pancit Canton 80g",
-    "imageUrl": "",
-    "sourceProductId": "10000000-0000-4000-8000-000000000002"
+    "imageUrl": "/uploads/catalog/e2263e69-42f9-45c0-a657-4e8709799374.png",
+    "sourceProductId": "10000000-0000-4000-8000-000000000002",
+    "imageFileName": "e2263e69-42f9-45c0-a657-4e8709799374.png",
+    "imageMimeType": "image/png",
+    "imageSize": 289543
   },
   {
     "id": "4a1f7a03-36fb-441d-ab32-f4d01b6ca04b",
     "name": "Argentina Corned Beef 150g",
-    "imageUrl": "",
-    "sourceProductId": "10000000-0000-4000-8000-000000000003"
+    "imageUrl": "/uploads/catalog/a2aa3de5-03ce-479d-9506-ead989becf33.png",
+    "sourceProductId": "10000000-0000-4000-8000-000000000003",
+    "imageFileName": "a2aa3de5-03ce-479d-9506-ead989becf33.png",
+    "imageMimeType": "image/png",
+    "imageSize": 133116
   },
   {
     "id": "e7a176ee-28ed-48d0-b771-1d5dc5d245c8",
     "name": "Gardenia Classic Bread 400g",
-    "imageUrl": "",
-    "sourceProductId": "10000000-0000-4000-8000-000000000004"
+    "imageUrl": "/uploads/catalog/90babf70-5660-4714-a75b-dafe383a7030.webp",
+    "sourceProductId": "10000000-0000-4000-8000-000000000004",
+    "imageFileName": "90babf70-5660-4714-a75b-dafe383a7030.webp",
+    "imageMimeType": "image/webp",
+    "imageSize": 136912
   },
   {
     "id": "a0dcac97-327a-4343-ad26-8dd160794252",
     "name": "Nestle Fresh Milk 1L",
-    "imageUrl": "",
-    "sourceProductId": "10000000-0000-4000-8000-000000000005"
+    "imageUrl": "/uploads/catalog/2f24cf34-db8d-4e04-8320-476fb464a49c.jpg",
+    "sourceProductId": "10000000-0000-4000-8000-000000000005",
+    "imageFileName": "2f24cf34-db8d-4e04-8320-476fb464a49c.jpg",
+    "imageMimeType": "image/jpeg",
+    "imageSize": 26636
   },
   {
     "id": "bfc9d32f-1c7d-459a-a241-dee1ffaffeb8",
     "name": "Yakult 80ml",
-    "imageUrl": "",
-    "sourceProductId": "10000000-0000-4000-8000-000000000006"
+    "imageUrl": "/uploads/catalog/513e9446-d823-4555-bf13-82ea01a3dd16.jpg",
+    "sourceProductId": "10000000-0000-4000-8000-000000000006",
+    "imageFileName": "513e9446-d823-4555-bf13-82ea01a3dd16.jpg",
+    "imageMimeType": "image/jpeg",
+    "imageSize": 55521
   },
   {
     "id": "315dbe90-c422-4543-b230-6177ed891c1d",
     "name": "Fudgee Barr Chocolate 40g",
-    "imageUrl": "",
-    "sourceProductId": "10000000-0000-4000-8000-000000000007"
+    "imageUrl": "/uploads/catalog/3886f975-67b8-4f85-9843-2f30556d4fce.webp",
+    "sourceProductId": "10000000-0000-4000-8000-000000000007",
+    "imageFileName": "3886f975-67b8-4f85-9843-2f30556d4fce.webp",
+    "imageMimeType": "image/webp",
+    "imageSize": 207112
   },
   {
     "id": "b289604a-4216-4809-bd04-07060b42be71",
     "name": "Rebisco Crackers 32g",
-    "imageUrl": "",
-    "sourceProductId": "10000000-0000-4000-8000-000000000008"
+    "imageUrl": "/uploads/catalog/f4e83a77-a212-40fe-96ca-b0247fe94188.png",
+    "sourceProductId": "10000000-0000-4000-8000-000000000008",
+    "imageFileName": "f4e83a77-a212-40fe-96ca-b0247fe94188.png",
+    "imageMimeType": "image/png",
+    "imageSize": 99135
   },
   {
     "id": "21cc8b39-bb2a-4b34-b45d-a7a07c6412c2",
     "name": "Pandesal Pack of 6",
-    "imageUrl": "",
-    "sourceProductId": "10000000-0000-4000-8000-000000000009"
+    "imageUrl": "/uploads/catalog/2b6a52b3-7e3e-41ea-a0b9-9294248acf9f.webp",
+    "sourceProductId": "10000000-0000-4000-8000-000000000009",
+    "imageFileName": "2b6a52b3-7e3e-41ea-a0b9-9294248acf9f.webp",
+    "imageMimeType": "image/webp",
+    "imageSize": 14606
   },
   {
     "id": "da47eb77-40a4-4bb1-af93-8c50b0c07a33",
     "name": "Nescafe 3-in-1 Original 27.5g",
-    "imageUrl": "",
-    "sourceProductId": "10000000-0000-4000-8000-000000000010"
+    "imageUrl": "/uploads/catalog/241792b3-a998-4b3f-a4d2-31f6dfedcdb3.png",
+    "sourceProductId": "10000000-0000-4000-8000-000000000010",
+    "imageFileName": "241792b3-a998-4b3f-a4d2-31f6dfedcdb3.png",
+    "imageMimeType": "image/png",
+    "imageSize": 341855
   },
   {
     "id": "16766580-6af7-4c7d-8bd5-35ce493e4dea",
     "name": "Plastic Sando Bags Pack of 100",
-    "imageUrl": "",
-    "sourceProductId": "10000000-0000-4000-8000-000000000011"
+    "imageUrl": "/uploads/catalog/b6cb769e-4046-4c7a-aff8-4a51235011cb.webp",
+    "sourceProductId": "10000000-0000-4000-8000-000000000011",
+    "imageFileName": "b6cb769e-4046-4c7a-aff8-4a51235011cb.webp",
+    "imageMimeType": "image/webp",
+    "imageSize": 36764
   },
   {
     "id": "af19e9b4-73ba-4885-9f3e-40f04effd208",
     "name": "Scrubbing Sponge",
-    "imageUrl": "",
-    "sourceProductId": "10000000-0000-4000-8000-000000000012"
+    "imageUrl": "/uploads/catalog/6ad54a89-aaa5-4f11-ad48-8c8f41b1cc6f.jpg",
+    "sourceProductId": "10000000-0000-4000-8000-000000000012",
+    "imageFileName": "6ad54a89-aaa5-4f11-ad48-8c8f41b1cc6f.jpg",
+    "imageMimeType": "image/jpeg",
+    "imageSize": 273928
   }
 ]
